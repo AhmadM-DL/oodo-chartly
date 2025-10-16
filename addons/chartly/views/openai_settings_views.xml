@@ -1,0 +1,40 @@
+<odoo>
+    <data>
+        <record id="view_openai_settings_form" model="ir.ui.view">
+            <field name="name">openai.settings.form</field>
+            <field name="model">openai.settings</field>
+            <field name="arch" type="xml">
+                <form string="OpenAI Settings">
+                    <sheet>
+                        <group>
+                            <field name="api_key" password="True"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_openai_settings_tree" model="ir.ui.view">
+            <field name="name">openai.settings.tree</field>
+            <field name="model">openai.settings</field>
+            <field name="arch" type="xml">
+                <tree string="OpenAI Settings">
+                    <field name="api_key" password="True"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_openai_settings" model="ir.actions.act_window">
+            <field name="name">OpenAI Settings</field>
+            <field name="res_model">openai.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+        <menuitem id="menu_openai_settings" 
+                  name="Settings" 
+                  parent="openai_chat_menu" 
+                  action="action_openai_settings"
+                  sequence="30"/>
+    </data>
+</odoo>
