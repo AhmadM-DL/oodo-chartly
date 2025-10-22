@@ -1,15 +1,13 @@
-version: '3.8'
-
 services:
   odoo:
-    image: odoo:19
-    command: odoo -c /etc/odoo/odoo.conf -i chartly
+    image: odoo:17
+    command: odoo -c /etc/odoo/odoo.conf -u base
     ports:
       - "8069:8069"
     volumes:
-      - odoo-data:/var/lib/odoo
+      - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
-      - ./odoo.conf:/etc/odoo/odoo.conf
+      - ./config:/etc/odoo
     environment:
       - HOST=db
       - USER=odoo
@@ -28,5 +26,5 @@ services:
       - db-data:/var/lib/postgresql/data
 
 volumes:
-  odoo-data:
+  odoo-web-data:
   db-data:
