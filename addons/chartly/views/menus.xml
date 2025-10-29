@@ -1,6 +1,7 @@
 <odoo>
     <data>
         <menuitem id="app" name="Chartly" sequence="10">
+            <menuitem id="chat" name="Chat" action="action_chartly_chat"/>
             <menuitem id="settings" name="Settings" action="action_chartly_settings"/>
         </menuitem>
     </data>

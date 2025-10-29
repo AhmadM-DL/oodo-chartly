@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_chartly_settings,Chartly Settings,model_chartly_settings,base.group_user,1,1,1,1
+access_chartly_chat,Chartly Chat,model_chartly_chat,base.group_user,1,1,1,1
+access_chartly_chat_message,Chartly Chat Message,model_chartly_chat_message,base.group_user,1,1,1,1

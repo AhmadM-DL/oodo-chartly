@@ -1,0 +1,42 @@
+from odoo import models, fields, api
+
+class Chat(models.Model):
+    _name = "chartly.chat"
+    _description = "Chartly Chat"
+    _order = "created_at desc"
+
+    title = fields.Char(string="Title", required=True, default="New Chat")
+    created_at = fields.Datetime(string="Created At", default=fields.Datetime.now)
+    messages = fields.One2many(
+        comodel_name="chartly.chat.message",
+        inverse_name="chat_id",
+        string="Messages"
+    )
+    message_count = fields.Integer(string="Message Count", compute="_compute_message_count")
+
+    @api.depends('messages')
+    def _compute_message_count(self):
+        for chat in self:
+            chat.message_count = len(chat.messages)
+
+    @api.model
+    def create_new_chat(self):
+        """Create a new chat"""
+        chat = self.create({
+            'title': 'New Chat'
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'chartly.chat',
+            'res_id': chat.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def get_chat_context(self):
+        """Get context for the chat interface"""
+        return {
+            'chat_id': self.id,
+            'title': self.title,
+            'message_count': self.message_count,
+        }

@@ -1,7 +1,0 @@
-<odoo>
-    <data>
-        <menuitem id="openai_chat_menu" name="OpenAI Chat" sequence="10"/>
-        <menuitem id="openai_chat_settings_menu" name="Settings" parent="openai_chat_menu" action="action_openai_settings" sequence="1"/>
-        <menuitem id="openai_chat_conversation_menu" name="Chat Conversations" parent="openai_chat_menu" action="action_chat_conversations" sequence="2"/>
-    </data>
-</odoo>

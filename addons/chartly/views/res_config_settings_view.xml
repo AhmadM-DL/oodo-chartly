@@ -1,0 +1,32 @@
+<odoo>
+
+    <record id="chartly_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.chartly</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="15" />
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+            <app data-string="Chartly" id="chartly" string="Chartly" name="chartly">
+                <block title="Chartly" id="chartly_setting">
+                    <setting string="OpenAI API Key">
+                        <field 
+                        name="api_key" 
+                        placeholder="Enter your OpenAI API Key here"
+                        style="width: 100%; min-width: 4rem;" />
+                    </setting>
+                </block>
+            </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_chartly_settings" model="ir.actions.act_window">
+        <field name="name">Chartly Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="chartly_settings_view_form" />
+        <field name="target">inline</field>
+        <field name="context">{'module': 'chartly'}</field>
+    </record>
+</odoo>

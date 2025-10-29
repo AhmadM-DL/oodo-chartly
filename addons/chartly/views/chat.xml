@@ -1,0 +1,56 @@
+<odoo>
+    <data>
+        <record id="chartly_chat_tree_view" model="ir.ui.view">
+            <field name="name">chartly.chat.tree</field>
+            <field name="model">chartly.chat</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="title" />
+                    <field name="message_count" />
+                    <field name="created_at" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="chartly_chat_form_view" model="ir.ui.view">
+            <field name="name">chartly.chat.form</field>
+            <field name="model">chartly.chat</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="title" placeholder="Chat Title"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="created_at" readonly="1"/>
+                            <field name="message_count" readonly="1"/>
+                        </group>
+                        <separator/>
+                        <div class="chat-widget-container">
+                            <widget name="chat_widget" />
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_chartly_chat" model="ir.actions.act_window">
+            <field name="name">Chartly Chat</field>
+            <field name="res_model">chartly.chat</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create': True}</field>
+        </record>
+
+        <record id="action_new_chat" model="ir.actions.server">
+            <field name="name">New Chat</field>
+            <field name="model_id" ref="model_chartly_chat"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = model.create_new_chat()
+            </field>
+        </record>
+
+    </data>
+</odoo>

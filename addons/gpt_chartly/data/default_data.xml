@@ -1,7 +1,0 @@
-<odoo>
-    <data noupdate="1">
-        <record id="default_openai_settings" model="openai_chat.openai_settings">
-            <field name="api_key">YOUR_OPENAI_API_KEY</field>
-        </record>
-    </data>
-</odoo>

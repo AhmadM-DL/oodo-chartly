@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Demo Chat Data -->
+        <record id="demo_chat_1" model="chartly.chat">
+            <field name="title">Getting Started with AI</field>
+            <field name="created_at">2024-01-01 10:00:00</field>
+        </record>
+
+        <record id="demo_message_1" model="chartly.chat.message">
+            <field name="chat_id" ref="demo_chat_1"/>
+            <field name="content">Hello! Can you help me understand how to use this chat interface?</field>
+            <field name="sender">user</field>
+            <field name="created_at">2024-01-01 10:00:00</field>
+        </record>
+
+        <record id="demo_message_2" model="chartly.chat.message">
+            <field name="chat_id" ref="demo_chat_1"/>
+            <field name="content">Hello! I'd be happy to help you get started with this chat interface. This is a ChatGPT-style chat system integrated into Odoo. You can:
+
+1. Type messages in the text box at the bottom
+2. Press Enter to send (or Shift+Enter for new lines)
+3. I'll respond to your questions and help with various tasks
+4. Chat history is automatically saved
+5. You can create new chats anytime
+
+What would you like to know more about?</field>
+            <field name="sender">ai</field>
+            <field name="created_at">2024-01-01 10:00:30</field>
+        </record>
+
+        <record id="demo_chat_2" model="chartly.chat">
+            <field name="title">Business Ideas Discussion</field>
+            <field name="created_at">2024-01-01 11:00:00</field>
+        </record>
+
+        <record id="demo_message_3" model="chartly.chat.message">
+            <field name="chat_id" ref="demo_chat_2"/>
+            <field name="content">I'm looking for innovative business ideas in the tech sector. What are some emerging trends?</field>
+            <field name="sender">user</field>
+            <field name="created_at">2024-01-01 11:00:00</field>
+        </record>
+
+        <record id="demo_message_4" model="chartly.chat.message">
+            <field name="chat_id" ref="demo_chat_2"/>
+            <field name="content">Great question! Here are some exciting emerging trends in the tech sector:
+
+**AI &amp; Machine Learning**
+- AI-powered business tools and automation
+- Personalized customer experiences
+- Predictive analytics for decision making
+
+**Web3 &amp; Blockchain**
+- Decentralized applications (dApps)
+- NFT marketplaces and digital ownership
+- Cryptocurrency payment solutions
+
+**Remote &amp; Hybrid Work Tools**
+- Virtual collaboration platforms
+- Digital workspace management
+- Remote team productivity tools
+
+**Sustainability Tech**
+- Carbon footprint tracking apps
+- Green energy management systems
+- Sustainable supply chain solutions
+
+Would you like me to elaborate on any of these areas or discuss specific business opportunities?</field>
+            <field name="sender">ai</field>
+            <field name="created_at">2024-01-01 11:00:45</field>
+        </record>
+    </data>
+</odoo>
