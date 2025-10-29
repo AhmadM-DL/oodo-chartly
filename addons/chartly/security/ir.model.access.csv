@@ -1,4 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_openai_settings,access_openai_settings,model_openai_settings,base.group_user,1,1,1,1
-access_openai_chat_conversation,access_openai_chat_conversation,model_openai_chat_conversation,base.group_user,1,1,1,1
-access_openai_chat_message,access_openai_chat_message,model_openai_chat_message,base.group_user,1,1,1,1
+access_chartly_settings,Chartly Settings,model_chartly_settings,base.group_user,1,1,1,1
