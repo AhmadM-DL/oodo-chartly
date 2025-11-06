@@ -28,9 +28,7 @@
                             <field name="message_count" readonly="1"/>
                         </group>
                         <separator/>
-                        <div class="chat-widget-container">
-                            <widget name="chat_widget" />
-                        </div>
+                        <widget name="chat_widget"/>
                     </sheet>
                 </form>
             </field>

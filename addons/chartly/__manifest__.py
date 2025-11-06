@@ -12,6 +12,12 @@
         "views/res_config_settings_view.xml",
         "views/menus.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "chartly/static/src/js/chat_widget.js",
+            "chartly/static/src/xml/chat_widget.xml",
+        ],
+    },
     "demo": [
         "demo/demo_data.xml",
     ],
