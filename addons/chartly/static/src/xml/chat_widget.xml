@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     
-    <t t-name="chartly.chat_widget" owl="1">
+    <t t-name="chartly.chat_widget">
         <div class="chat-widget-container" style="height: 600px; display: flex; flex-direction: column; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-            <!-- <div class="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; background-color: #f9f9f9;">
-                <t t-if="props.record.data.messages and props.record.data.messages.records.length > 0">
-                    <t t-foreach="props.record.data.messages.records" t-as="message" t-key="message.id">
+            <div class="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; background-color: #f9f9f9;">
+                <t t-if="state.messages.length">
+                    <t t-foreach="state.messages" t-as="message" t-key="message.id">
                         <div class="message-wrapper" style="margin-bottom: 15px;">
-                            <t t-if="message.data.sender == 'user'">
+                            <t t-if="message.sender == 'user'">
                                 <div style="display: flex; justify-content: flex-end;">
                                     <div style="background-color: #007bff; color: white; padding: 12px; border-radius: 12px; max-width: 70%;">
                                         <div style="font-weight: bold; margin-bottom: 5px;">You</div>
-                                        <div style="white-space: pre-wrap; word-wrap: break-word;"><t t-esc="message.data.content"/></div>
-                                        <div style="font-size: 0.75em; opacity: 0.8; margin-top: 5px; text-align: right;">
-                                            <t t-esc="message.data.created_at"/>
-                                        </div>
+                                        <div style="white-space: pre-wrap; word-wrap: break-word;" t-esc="message.content"/>
+                                        <div style="font-size: 0.75em; opacity: 0.8; margin-top: 5px; text-align: right;" t-esc="message.created_at"/>
                                     </div>
                                 </div>
                             </t>
-                            <t t-if="message.data.sender == 'ai'">
+                            <t t-if="message.sender == 'ai'">
                                 <div style="display: flex; justify-content: flex-start;">
                                     <div style="background-color: #e9ecef; color: #333; padding: 12px; border-radius: 12px; max-width: 70%;">
                                         <div style="font-weight: bold; margin-bottom: 5px; color: #28a745;">AI Assistant</div>
-                                        <div style="white-space: pre-wrap; word-wrap: break-word;"><t t-esc="message.data.content"/></div>
-                                        <div style="font-size: 0.75em; opacity: 0.6; margin-top: 5px;">
-                                            <t t-esc="message.data.created_at"/>
-                                        </div>
+                                        <div style="white-space: pre-wrap; word-wrap: break-word;" t-esc="message.content"/>
+                                        <div style="font-size: 0.75em; opacity: 0.6; margin-top: 5px;" t-esc="message.created_at"/>
                                     </div>
                                 </div>
                             </t>
@@ -43,13 +39,16 @@
                 <input type="text" 
                        placeholder="Type your message here..." 
                        class="form-control chat-message-input" 
+                       t-model="state.inputValue"
+                       t-on-keypress="onKeyPress"
                        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"/>
                 <button type="button" 
-                        class="btn btn-primary chat-send-button" 
+                        class="btn btn-primary chat-send-button"
+                        t-on-click="onSendMessage" 
                         style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Send
                 </button>
-            </div> -->
+            </div>
         </div>
     </t>
     

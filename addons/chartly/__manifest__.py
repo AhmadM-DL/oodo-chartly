@@ -15,6 +15,7 @@
     "assets": {
         "web.assets_backend": [
             "chartly/static/src/js/chat_widget.js",
+            "chartly/static/src/js/chat_form_controller.js",
             "chartly/static/src/xml/chat_widget.xml",
         ],
     },

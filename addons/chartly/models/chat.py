@@ -13,11 +13,18 @@ class Chat(models.Model):
         string="Messages"
     )
     message_count = fields.Integer(string="Message Count", compute="_compute_message_count")
+    # Add a dummy field for the widget to bind to
+    chat_interface = fields.Char(string="Chat Interface", compute="_compute_chat_interface")
 
     @api.depends('messages')
     def _compute_message_count(self):
         for chat in self:
             chat.message_count = len(chat.messages)
+
+    def _compute_chat_interface(self):
+        """Dummy compute method for the widget"""
+        for chat in self:
+            chat.chat_interface = "chat"
 
     @api.model
     def create_new_chat(self):
