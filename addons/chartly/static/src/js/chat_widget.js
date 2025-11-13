@@ -1,7 +1,13 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
+import {
+  Component,
+  useState,
+  onWillStart,
+  onMounted,
+  onWillUpdateProps,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class ChatWidget extends Component {
@@ -11,6 +17,7 @@ export class ChatWidget extends Component {
 
   setup() {
     this.rpc = useService("rpc");
+    this.previousChatId = null;
 
     this.state = useState({
       messages: [],
@@ -24,10 +31,35 @@ export class ChatWidget extends Component {
 
     onWillStart(async () => {
       await this.loadMessages();
+      this.previousChatId = this.chatId;
     });
 
     onMounted(() => {
       this.scrollToBottom();
+    });
+
+    onWillUpdateProps(async (nextProps) => {
+      const nextChatId = nextProps.record?.resId || nextProps.chatId;
+      console.log(
+        "Chat ID changing from",
+        this.previousChatId,
+        "to",
+        nextChatId
+      );
+
+      if (nextChatId !== this.previousChatId) {
+        this.previousChatId = nextChatId;
+
+        // Clear messages immediately for new/different chat
+        this.state.messages = [];
+        this.state.inputValue = "";
+
+        // Load messages for the new chat
+        if (nextChatId) {
+          await this.loadMessages(nextChatId);
+          this.scrollToBottom();
+        }
+      }
     });
   }
 
@@ -37,13 +69,16 @@ export class ChatWidget extends Component {
     return id;
   }
 
-  async loadMessages() {
-    const chatId = this.chatId;
-    if (!chatId) return;
+  async loadMessages(chatId = null) {
+    const id = chatId || this.chatId;
+    if (!id) {
+      this.state.messages = [];
+      return;
+    }
 
     try {
       const result = await this.rpc("/chartly/get_messages", {
-        chat_id: chatId,
+        chat_id: id,
       });
 
       if (result.success) {
