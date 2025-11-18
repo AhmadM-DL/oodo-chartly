@@ -1,8 +1,7 @@
 from odoo import http
 from odoo.http import request
-import urllib.request
-import json
 import logging
+from odoo.addons.chartly.core.utils import get_openai_client
 
 _logger = logging.getLogger(__name__)
 
@@ -31,13 +30,22 @@ class ChartlyController(http.Controller):
                 'sender': 'user'
             })
             
-            # Get AI response
-            ai_response = self._get_ai_response(chat, message_content)
+            # Get AI response via OpenAIClient
+            openai_client = get_openai_client(request.env)
+            chat_history = openai_client.prepare_chat_history(chat.messages)
+            chat_history = openai_client.add_user_message(message_content)
+            
+            ai_result = openai_client.chat_completion(chat_history)
+            
+            if ai_result.get('success'):
+                ai_content = ai_result.get('content', 'No response from AI.')
+            else:
+                ai_content = f"Error: {ai_result.get('error', 'Unknown error')}"
             
             # Create AI message
             ai_message = request.env['chartly.chat.message'].create({
                 'chat_id': chat_id,
-                'content': ai_response,
+                'content': ai_content,
                 'sender': 'ai'
             })
             
@@ -103,57 +111,3 @@ class ChartlyController(http.Controller):
         except Exception as e:
             _logger.error(f"Error in create_chat: {str(e)}")
             return {'success': False, 'error': str(e)}
-
-    def _get_ai_response(self, chat, message_content):
-        """Get response from OpenAI API"""
-        api_key = request.env['ir.config_parameter'].sudo().get_param('chartly.api_key')
-        
-        if not api_key:
-            return "Error: OpenAI API key not configured. Please configure it in Settings."
-        
-        try:
-            # Prepare conversation history
-            messages = []
-            for msg in chat.messages.sorted('created_at'):
-                if msg.sender == 'user':
-                    messages.append({"role": "user", "content": msg.content})
-                elif msg.sender == 'ai':
-                    messages.append({"role": "assistant", "content": msg.content})
-            
-            # Add current message
-            messages.append({"role": "user", "content": message_content})
-            
-            # Make API call
-            data = {
-                'model': 'gpt-3.5-turbo',
-                'messages': messages,
-                'max_tokens': 1000,
-                'temperature': 0.7
-            }
-            
-            req = urllib.request.Request(
-                'https://api.openai.com/v1/chat/completions',
-                data=json.dumps(data).encode('utf-8'),
-                headers={
-                    'Authorization': f'Bearer {api_key}',
-                    'Content-Type': 'application/json'
-                }
-            )
-            
-            with urllib.request.urlopen(req, timeout=30) as response:
-                result = json.loads(response.read().decode('utf-8'))
-                if 'choices' in result and len(result['choices']) > 0:
-                    return result['choices'][0]['message']['content']
-                else:
-                    return "Error: Unexpected response format from OpenAI API"
-                
-        except urllib.error.HTTPError as e:
-            error_msg = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
-            _logger.error(f"OpenAI API HTTP error: {e.code} - {error_msg}")
-            return f"Error: Failed to get AI response. Status code: {e.code}"
-        except urllib.error.URLError as e:
-            _logger.error(f"OpenAI API URL error: {str(e)}")
-            return "Error: Request timeout or connection error. Please try again."
-        except Exception as e:
-            _logger.error(f"Error calling OpenAI API: {str(e)}")
-            return f"Error: {str(e)}"
