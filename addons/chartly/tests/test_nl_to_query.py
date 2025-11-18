@@ -52,4 +52,4 @@ class TestOpenAIClientLive(TransactionCase):
                     )
 
         if failures:
-            print(f"We have {len(failures)}/50 fails.")
+            self.fail(f"We have {len(failures)}/50 fails.")
