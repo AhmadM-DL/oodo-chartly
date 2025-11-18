@@ -1,13 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import {
-  Component,
-  useState,
-  onWillStart,
-  onMounted,
-  onWillUpdateProps,
-} from "@odoo/owl";
+import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class ChatWidget extends Component {
@@ -17,7 +11,6 @@ export class ChatWidget extends Component {
 
   setup() {
     this.rpc = useService("rpc");
-    this.previousChatId = null;
 
     this.state = useState({
       messages: [],
@@ -25,41 +18,19 @@ export class ChatWidget extends Component {
       isLoading: false,
     });
 
-    // Debug: Log props to see what we're receiving
-    console.log("ChatWidget props:", this.props);
-    console.log("Chat ID:", this.chatId);
+    console.log("ChatWidget setup - Chat ID:", this.chatId);
 
     onWillStart(async () => {
+      console.log(
+        "ChatWidget onWillStart - loading messages for chat:",
+        this.chatId
+      );
       await this.loadMessages();
-      this.previousChatId = this.chatId;
     });
 
     onMounted(() => {
+      console.log("ChatWidget mounted");
       this.scrollToBottom();
-    });
-
-    onWillUpdateProps(async (nextProps) => {
-      const nextChatId = nextProps.record?.resId || nextProps.chatId;
-      console.log(
-        "Chat ID changing from",
-        this.previousChatId,
-        "to",
-        nextChatId
-      );
-
-      if (nextChatId !== this.previousChatId) {
-        this.previousChatId = nextChatId;
-
-        // Clear messages immediately for new/different chat
-        this.state.messages = [];
-        this.state.inputValue = "";
-
-        // Load messages for the new chat
-        if (nextChatId) {
-          await this.loadMessages(nextChatId);
-          this.scrollToBottom();
-        }
-      }
     });
   }
 
