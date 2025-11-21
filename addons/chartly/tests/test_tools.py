@@ -1,6 +1,6 @@
 from odoo.tests.common import TransactionCase
 from odoo.addons.chartly.core.openai import OpenAIClient
-from odoo.addons.chartly.core.query_to_plot import query_to_plot
+from odoo.addons.chartly.core import tools
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 import os
@@ -9,6 +9,12 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 class TestOpenAIClientLive(TransactionCase):
+
+    def override_openai_client(self, client):
+        tools._openai_client_override = client
+
+    def override_env(self, env):
+        tools._env = env
 
     def setUp(self):
         super().setUp()
@@ -65,25 +71,14 @@ class TestOpenAIClientLive(TransactionCase):
             "date": formatted,
         })
 
-    def test_query_to_plot(self):
-
-        query = "Plot a bar chart of the top 10 customers by payments in the last month"
-
-        model = "account.payment"
-        domain = [
-            ("payment_type", "=", "inbound"),
-        ]
-
-        Payment = self.env[model]
-
-        records = Payment.search(domain)
-
-        attributes = records[0]._fields.keys()
-
+        # ------------------------------
+        # Initialize OpenAI client and test env override
+        # ------------------------------
         self.client = OpenAIClient(api_key=self.api_key)
-
-        plot_script = query_to_plot(self.client, query, attributes)
-
-        logger.info(f"Plot Script: \n {plot_script}")
-
-        self.assertTrue(plot_script)
+        self.override_env(self.env)
+        self.override_openai_client(self.client)
+        
+    def test_query_return_a_plot(self):
+        query = "Plot a bar chart of the top payments in the last 30 days"
+        plot_binary = tools.query_returning_plot(query)
+        logger.info(plot_binary)

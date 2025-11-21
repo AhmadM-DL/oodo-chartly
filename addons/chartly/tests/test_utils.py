@@ -1,5 +1,5 @@
 from odoo.tests.common import TransactionCase
-from odoo.addons.chartly.core.utils import parse_odoo_domain
+from odoo.addons.chartly.core.utils import parse_odoo_domain, extract_script_as_fct
 
 class TestSafeDomainEval(TransactionCase):
 
@@ -26,3 +26,12 @@ class TestSafeDomainEval(TransactionCase):
         domain = "[('date', '=', os.path.join('a','b'))]"
         with self.assertRaises(ValueError):
             parse_odoo_domain(domain)
+
+    def test_script_extraction(self):
+        script = """
+def calculate(a, b):
+    return a + b
+        """
+        func = extract_script_as_fct(script, "calculate")
+        result = func(2, 3)
+        self.assertEqual(result, 5)
