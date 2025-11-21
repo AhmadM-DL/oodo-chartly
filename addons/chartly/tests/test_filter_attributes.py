@@ -20,10 +20,6 @@ class TestOpenAIClientLive(TransactionCase):
             'email': 'partner1@example.com'
         })
 
-    def tearDown(self):
-        super().tearDown()
-        self.patcher.stop()
-
     def test_filter_attributes(self):
         query = "List all customers"
         model = "res.partner"
