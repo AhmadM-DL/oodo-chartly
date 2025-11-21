@@ -5,7 +5,7 @@
     "summary": "Generate charts and visualizations using natural language prompts.",
     "description": "This module provides functionalities to generate charts and visualizations based on user input and natural language prompts.",
     "author": "Ahmad Mustapha, Ali Sahili",
-    "depends": ["base", "web"],
+    "depends": ["base", "web", "account"],
     "data": [
         "security/ir.model.access.csv",
         "views/chat.xml",

@@ -1,5 +1,7 @@
 import json, os
-from odoo.addons.chartly.core.utils import get_openai_client
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 ALLOWED_ODOO_MODELS_FILENAME = "allowed_odoo_models.txt"
 NL_TO_QUERY_PROMPT_FILENAME = "nl_to_query_prompt.txt"
@@ -45,7 +47,8 @@ def nl_to_query(client, text: str)-> dict:
     messages = []
     messages = client.add_system_message(messages, prompt)
     messages = client.add_user_message(messages, f"Query: {text}")
-    response = client.chat_completion(messages)
+    # logger.info(messages)
+    response = client.chat_completion(messages, model="gpt-3.5-turbo", temperature= 0.3,)
     response_content = response.get("content")
     response_content = json.loads(response_content)
     if (not is_restricted(response_content)):

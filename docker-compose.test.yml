@@ -3,7 +3,7 @@ services:
     image: odoo:17
     ports:
       - "8069:8069"
-    command: odoo -c /etc/odoo/odoo.conf  -i chartly --stop-after-init --test-tags=/chartly --logfile=
+    command: odoo -c /etc/odoo/odoo.conf  -i account,chartly --stop-after-init --test-tags=/chartly --logfile=
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons

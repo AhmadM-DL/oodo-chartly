@@ -1,9 +1,13 @@
-# -*- coding: utf-8 -*-
 from odoo.tests.common import TransactionCase
-from odoo.addons.chartly.core.utils import OpenAIClient
+from odoo.addons.chartly.core.openai import OpenAIClient
+from odoo.addons.chartly.core.utils import parse_odoo_domain
 from odoo.addons.chartly.core.nl_to_query import nl_to_query
-import os, csv, ast
+import os, csv
 
+# We tried alot of configuration tempretaure / model 
+# Used LLM as a judge for 50 queries
+# Change the prompt a lot - best was many shot like 40 examples - 70% success
+# Some failuers were valid others were not
 class TestOpenAIClientLive(TransactionCase):
 
     def setUp(self):
@@ -31,25 +35,39 @@ class TestOpenAIClientLive(TransactionCase):
                     failures.append(f"Query: {query} raised exception {e}")
                     continue
 
+                if result.get('not_restricted', None):
+                    failures.append(f"Query: {query} led to unrestricted domain:\n {result['domain']}")
+                    continue
+
+                if result.get('not_safe', None):
+                    failures.append(f"Query: {query} led to unsafe domain: \n {result['domain']}")
+                    continue
+
+                if result.get('not_formatted', None):
+                    failures.append(f"Query: {query} led to not well formatted domain: \n {result['domain']}")
+                    continue
+
                 # Compare model
                 model_match = (expected_model == "ERROR" and result.get("error")) or (result.get("model") == expected_model)
                 
                 # Compare domain if no error
                 if expected_model != "ERROR":
                     try:
-                        domain_result = ast.literal_eval(result.get("domain", "[]"))
-                        domain_expected = ast.literal_eval(expected_domain)
+                        domain_result = result.get("domain", "[]")
+                        domain_result = parse_odoo_domain(domain_result)
+                        domain_expected = parse_odoo_domain(expected_domain)
                         domain_match = set(domain_result) == set(domain_expected)
                     except Exception as e:
-                        failures.append(f"Query: {query} failed to eval domain: {e}")
+                        failures.append(f"Query: {query} failed to eval domain: {e} \n {domain_result}")
                         continue
                 else:
                     domain_match = "error" in result
 
                 if not (model_match and domain_match):
                     failures.append(
-                        f"Query: {query}\nExpected: model={expected_model}, domain={expected_domain}\nGot: {result}"
+                        f"Query: {query}\nExpected: model={expected_model}, domain={expected_domain}\nGot: {result['model']}, {result['domain']}"
                     )
 
         if failures:
-            self.fail(f"We have {len(failures)}/50 fails.")
+            failures_str = "\n\n".join(failures)
+            self.fail(f"We have {len(failures)}/50 fails. \n {failures_str}")

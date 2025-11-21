@@ -1,39 +1,28 @@
-# -*- coding: utf-8 -*-
 from odoo.tests.common import TransactionCase
-from odoo.addons.chartly.core.utils import OpenAIClient
-import os
+from odoo.addons.chartly.core.utils import parse_odoo_domain
 
-class TestOpenAIClientLive(TransactionCase):
+class TestSafeDomainEval(TransactionCase):
 
-    def setUp(self):
-        super().setUp()
-        self.api_key_file = os.environ.get("OPENAI_API_KEY_FILE")
-        with open(self.api_key_file, "r") as f:
-            self.api_key = f.read()
-        self.client = OpenAIClient(self.api_key)
+    def test_valid_domain(self):
+        domain = """[
+            ('name', '=', 'Ahmad'),
+            ('invoice_date', '>=', datetime.date.today() - datetime.timedelta(days=30))
+        ]"""
+        result = parse_odoo_domain(domain)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0][0], "name")
 
-    def test_chat_completion_live(self):
-        messages = [{"role": "user", "content": "Say hello to me."}]
-        result = self.client.chat_completion(messages, max_tokens=10, temperature=0)
+    def test_reject_unknown_function(self):
+        domain = "[('name', '=', badfunc('x'))]"
+        with self.assertRaises(ValueError):
+            parse_odoo_domain(domain)
 
-        # Check API returned success
-        self.assertTrue(result['success'])
-        self.assertIn('content', result)
-        # The content should contain some form of greeting
-        self.assertTrue(any(word in result['content'].lower() for word in ['hello', 'hi']))
+    def test_reject_import(self):
+        domain = "[('name', '=', __import__('os').system('rm -rf /'))]"
+        with self.assertRaises(ValueError):
+            parse_odoo_domain(domain)
 
-    def test_chat_completion_with_tools_live(self):
-        # Example tools (your actual tools may vary)
-        tools = [
-            OpenAIClient.create_function_tool(
-                name="echo_tool",
-                description="Echoes back the input",
-                parameters={"input": {"type": "string", "description": "Text to echo"}},
-                required= ["input"]
-            )
-        ]
-        messages = [{"role": "user", "content": "Test tool usage"}]
-        result = self.client.chat_completion_with_tools(messages, tools, max_tokens=50)
-
-        self.assertTrue(result['success'])
-        self.assertIn('content', result)
+    def test_reject_attributes_not_allowed(self):
+        domain = "[('date', '=', os.path.join('a','b'))]"
+        with self.assertRaises(ValueError):
+            parse_odoo_domain(domain)

@@ -1,11 +1,20 @@
 from odoo import http
 from odoo.http import request
 import logging
-from odoo.addons.chartly.core.utils import get_openai_client
+import os
+from odoo.addons.chartly.core.openai import get_openai_client
 
 _logger = logging.getLogger(__name__)
 
+PROMPT_FILENAME = "main_prompt.txt"
+
 class ChartlyController(http.Controller):
+
+    def _get_system_message():
+        filepath = os.path.join(os.path.dirname(__file__), PROMPT_FILENAME)
+        with open(filepath, "r") as f:
+            system_prompt = f.read()
+        return system_prompt
 
     @http.route('/chartly/send_message', type='json', auth='user', methods=['POST'], csrf=False)
     def send_message(self, chat_id, message_content):
@@ -33,9 +42,10 @@ class ChartlyController(http.Controller):
             # Get AI response via OpenAIClient
             openai_client = get_openai_client(request.env)
             chat_history = openai_client.prepare_chat_history(chat.messages)
+            chat_history = openai_client.add_system_message(self._get_system_message())
             chat_history = openai_client.add_user_message(message_content)
             
-            ai_result = openai_client.chat_completion(chat_history)
+            ai_result = openai_client.chat_completion(chat_history, model="gpt-4")
             
             if ai_result.get('success'):
                 ai_content = ai_result.get('content', 'No response from AI.')
