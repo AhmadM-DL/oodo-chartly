@@ -1,1 +1,2 @@
+sqlvalidator==0.0.20
 matplotlib==3.10.7

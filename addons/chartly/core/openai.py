@@ -1,27 +1,50 @@
+from typing import Callable
 import urllib.request
 import json
 import logging
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'gpt-5.1'
+PRICING = {
+    'gpt-5.1': {
+        'input_per_1M': 1.25,
+        'output_per_1M': 10.00,
+        'cached_per_1M': 0.125
+    },
+    'gpt-5-nano': {
+        'input_per_1M': 0.05,
+        'output_per_1M': 0.40,
+        'cached_per_1M': 0.005
+    },
+    'gpt-4': {
+        'input_per_1M': 30.00,
+        'output_per_1M': 60.00,
+        'cached_per_1M': 0      # no cached-token pricing provided
+    },
+    'gpt-3.5-turbo': {
+        'input_per_1M': 0.50,
+        'output_per_1M': 1.50,
+        'cached_per_1M': 0      # no cached-token pricing provided
+    }
+}
 
 class OpenAIClient:
     
-    def __init__(self, api_key):
+    def __init__(self, api_key, model):
         self.api_key = api_key
         self.base_url = 'https://api.openai.com/v1'
         self.timeout = 30
-    
-    def chat_completion(self, messages, model=DEFAULT_MODEL, max_tokens=1000, temperature=0.7, tools=None, tool_choice=None):
+        self.model = model
+
+    def chat_completion(self, messages, max_tokens=1000, temperature=0.7, tools=None, tool_choice=None):
         try:
 
             data = {
-                'model': model,
+                'model': self.model,
                 'messages': messages,
             }
 
-            if model in ["gpt-5-nano", "gpt-5.1"]:
+            if self.model in ["gpt-5-nano", "gpt-5.1"]:
                 data["max_completion_tokens"] = max_tokens
                 data['temperature'] = 1
             else:
@@ -47,20 +70,26 @@ class OpenAIClient:
                 
                 if 'choices' in result and len(result['choices']) > 0:
                     choice = result['choices'][0]
+                   
+                    usage = result.get('usage', {})
+
                     response_data = {
                         'success': True,
                         'content': choice['message'].get('content'),
-                        'usage': result.get('usage', {}),
-                        'model': result.get('model', model),
+                        'usage': usage,
+                        'cost': self._compute_request_cost(self.model, usage),
+                        'model': result.get('model', self.model),
                         'finish_reason': choice.get('finish_reason')
                     }
+
+                    logger.info(f"OpenAI API response usage: {usage}")
                     
                     if 'tool_calls' in choice['message']:
                         response_data['tool_calls'] = choice['message']['tool_calls']
                     
                     return response_data
                 else:
-                    _logger.error(f"Unexpected API response format: {result}")
+                    logger.error(f"Unexpected API response format: {result}")
                     return {
                         'success': False,
                         'error': 'Unexpected response format from OpenAI API'
@@ -68,43 +97,66 @@ class OpenAIClient:
                     
         except urllib.error.HTTPError as e:
             error_msg = self._parse_http_error(e)
-            _logger.error(f"OpenAI API HTTP error: {e.code} - {error_msg}")
+            logger.error(f"OpenAI API HTTP error: {e.code} - {error_msg}")
             return {
                 'success': False,
                 'error': f'API request failed with status {e.code}: {error_msg}'
             }
             
         except urllib.error.URLError as e:
-            _logger.error(f"OpenAI API URL error: {str(e)}")
+            logger.error(f"OpenAI API URL error: {str(e)}")
             return {
                 'success': False,
                 'error': 'Request timeout or connection error'
             }
             
         except json.JSONDecodeError as e:
-            _logger.error(f"Failed to parse API response: {str(e)}")
+            logger.error(f"Failed to parse API response: {str(e)}")
             return {
                 'success': False,
                 'error': 'Invalid response from API'
             }
             
         except Exception as e:
-            _logger.error(f"Unexpected error calling OpenAI API: {str(e)}")
+            logger.error(f"Unexpected error calling OpenAI API: {str(e)}")
             return {
                 'success': False,
                 'error': f'Unexpected error: {str(e)}'
             }
     
-    def chat_completion_with_tools(self, messages, tools, model=DEFAULT_MODEL, max_tokens=1000, temperature=0.7, tool_choice='auto'):
-        return self.chat_completion(
-            messages=messages,
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            tools=tools,
-            tool_choice=tool_choice
-        )
-    
+    def chat_completion_with_tools(self, messages, tools, max_tokens=1000, temperature=0.7, tool_choice='auto'):
+        history = messages.copy()
+        cost = 0
+
+        while True:
+            response = self.chat_completion(history, max_tokens=max_tokens, temperature=temperature, tools=tools, tool_choice=tool_choice)
+            
+            if response.get('tool_calls') is None:
+                response["cost"] = cost + response.get("cost", 0)
+                return response
+            
+            if len(response.get('tool_calls')) > 1:
+                logger.error("Multiple tool calls in a single response are not supported.")
+                response["success"] = False
+                response["error"] = "Multiple tool calls in a single response are not supported."
+                return response
+            
+            history = self.add_tool_call(history, response['tool_calls'][0])
+            
+            # Call the tool
+            tool_name = response['tool_calls'][0]['name']
+            tool_input = response['tool_calls'][0]['arguments']
+
+            if tool_name in [tool['function']['name'] for tool in tools]:
+                tool_response = self.execute_tool(tool_name, tool_input)
+                if tool_response.get('error'):
+                    response["success"] = False
+                    response["error"] = tool_response.get('error')
+                    return response
+                tool_text = tool_response.get('text')
+                cost += tool_response.get('cost', 0)
+                history = self.add_tool_response(history, response['tool_calls'][0].get('id'), tool_name, tool_text)
+          
     def _parse_http_error(self, error):
         try:
             if hasattr(error, 'read'):
@@ -116,7 +168,29 @@ class OpenAIClient:
             return str(error)
         except Exception:
             return str(error)
+        
+    def _compute_request_cost(model, usage):
+        input_tokens = usage.get('input_tokens', 0)
+        output_tokens = usage.get('output_tokens', 0)
+        cached_tokens = usage.get('prompt_tokens_details', {}).get('cached_tokens', 0)
+        if model not in PRICING.keys():
+            logger.warning(f"Model {model} not found in pricing list.")
+            return -1.0
+        pricing = PRICING.get(model)
+        input_tokens_cost = pricing['input_per_1M'] * (input_tokens / 1000000)
+        cached_tokens_cost = pricing['cached_per_1M'] * (cached_tokens / 1000000)
+        output_tokens_cost = pricing['output_per_1M'] * (output_tokens / 1000000)
+        cost = input_tokens_cost + cached_tokens_cost + output_tokens_cost
+        return round(cost, 3)
     
+    def execute_tool(self, function: Callable, tool_input):
+        try:
+            result = function(**tool_input)
+            return result
+        except Exception as e:
+            logger.error(f"Error executing tool {function}: {str(e)}")
+            return {"text": f"Error executing tool {function}: {str(e)}", "cost": 0}
+
     @staticmethod
     def prepare_chat_history(chat_messages):
         messages = []
@@ -136,6 +210,20 @@ class OpenAIClient:
         return [{"role": "system", "content": system_content}] + messages 
     
     @staticmethod
+    def add_assistant_message(messages, assistant_content):
+        return messages + [{"role": "assistant", "content": assistant_content}]
+    
+    @staticmethod
+    def add_tool_call(messages, tool_call):
+        messages.append({
+            "role": "tool_call",
+            "tool_call_id": tool_call.get('id'),
+            "name": tool_call.get('name'),
+            "arguments": tool_call.get('arguments')
+        })
+        return messages
+    
+    @staticmethod
     def add_tool_response(messages, tool_call_id, tool_name, tool_response):
         messages.append({
             "role": "tool",
@@ -146,11 +234,12 @@ class OpenAIClient:
         return messages
     
     @staticmethod
-    def create_function_tool(name, description, parameters, required):
+    def create_function_tool(function: Callable, name, description, parameters, required):
         return {
             "type": "function",
             "function": {
                 "name": name,
+                "call": function,
                 "description": description,
                 "parameters":{
                     "type": "object",
@@ -163,4 +252,5 @@ class OpenAIClient:
 
 def get_openai_client(env):
     api_key = env['ir.config_parameter'].sudo().get_param('chartly.api_key')
-    return OpenAIClient(api_key)
+    model = env['ir.config_parameter'].sudo().get_param('chartly.model')
+    return OpenAIClient(api_key, model)

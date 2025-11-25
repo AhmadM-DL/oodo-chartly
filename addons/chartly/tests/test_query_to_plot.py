@@ -19,6 +19,8 @@ class TestOpenAIClientLive(TransactionCase):
         self.api_key_file = os.environ.get("OPENAI_API_KEY_FILE")
         with open(self.api_key_file, "r") as f:
             self.api_key = f.read()
+        self.model = os.environ.get("OPENAI_MODEL")
+        self.client = OpenAIClient(self.api_key, self.model)
 
         # ------------------------------
         # Create sample customers

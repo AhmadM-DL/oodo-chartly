@@ -14,7 +14,6 @@ services:
       - HOST=db
       - USER=odoo
       - PASSWORD=odoo
-      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
     depends_on:
       - db
 

@@ -10,7 +10,8 @@ class TestOpenAIClientLive(TransactionCase):
         self.api_key_file = os.environ.get("OPENAI_API_KEY_FILE")
         with open(self.api_key_file, "r") as f:
             self.api_key = f.read()
-        self.client = OpenAIClient(self.api_key)
+        self.model = os.environ.get("OPENAI_MODEL")
+        self.client = OpenAIClient(self.api_key, self.model)
 
     def test_chat_completion_live(self):
         messages = [{"role": "user", "content": "Say hello to me."}]

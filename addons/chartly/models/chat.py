@@ -15,6 +15,12 @@ class Chat(models.Model):
     message_count = fields.Integer(string="Message Count", compute="_compute_message_count")
     # Add a dummy field for the widget to bind to
     chat_interface = fields.Char(string="Chat Interface", compute="_compute_chat_interface")
+    total_cost = fields.Float(string="Total Cost", compute="_compute_total_cost")
+
+    @api.depends('messages')
+    def _compute_total_cost(self):
+        for chat in self:
+            chat.total_cost = sum(chat.messages.mapped('cost'))
 
     @api.depends('messages')
     def _compute_message_count(self):
@@ -46,4 +52,5 @@ class Chat(models.Model):
             'chat_id': self.id,
             'title': self.title,
             'message_count': self.message_count,
+            'total_cost': self.total_cost,
         }

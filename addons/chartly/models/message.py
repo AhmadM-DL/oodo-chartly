@@ -7,11 +7,13 @@ class ChatMessage(models.Model):
 
     chat_id = fields.Many2one("chartly.chat", string="Chat", required=True, ondelete="cascade")
     content = fields.Text(string="Content", required=True)
+    cost = fields.Float(string="Cost", default=0.0)
     sender = fields.Selection(
         [("user", "User"), ("ai", "AI")],
         string="Sender",
         required=True
     )
+
     created_at = fields.Datetime(string="Created At", default=fields.Datetime.now)
     has_image = fields.Boolean(string="Has Image", default=False)
     image = fields.Binary(string="Image")

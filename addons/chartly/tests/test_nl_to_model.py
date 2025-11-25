@@ -25,7 +25,8 @@ class TestNLToModelCSV(TransactionCase):
         self.api_key_file = os.environ.get("OPENAI_API_KEY_FILE")
         with open(self.api_key_file, "r") as f:
             self.api_key = f.read()
-        self.client = OpenAIClient(self.api_key)
+        self.model = os.environ.get("OPENAI_MODEL")
+        self.client = OpenAIClient(self.api_key, self.model)
 
         self.csv_path = os.path.join(os.path.dirname(__file__), "nl_model_test_pairs.csv")
 
@@ -41,8 +42,7 @@ class TestNLToModelCSV(TransactionCase):
 
         failures = []
         for query, expected_models in self.test_cases:
-            result = nl_to_model(client=self.client, text=query)
-            models_result = result.get("models")
+            models_result = nl_to_model(client=self.client, text=query)
             logger.info("Query: %s -> Models: %s", query, models_result)
             if not set(expected_models) == (set(models_result)):
                 failures.append(f"Query: {query}\nExpected: {expected_models}\nGot: {models_result}")

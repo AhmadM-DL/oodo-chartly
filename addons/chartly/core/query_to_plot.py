@@ -19,4 +19,5 @@ def query_to_plot(client, query, data_attributes: str)-> str:
     response = client.chat_completion(messages, model="gpt-3.5-turbo", temperature= 0.3,)
     response_content = response.get("content")
     logger.info(f"Query to Plot response content:\n{response_content}")
-    return response_content
+    request_cost = response.get("cost")
+    return {"plot_script": response_content, "cost": request_cost}

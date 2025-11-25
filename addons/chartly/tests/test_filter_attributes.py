@@ -6,14 +6,16 @@ import os
 from logging import getLogger
 logger = getLogger(__name__)
 
+
 class TestOpenAIClientLive(TransactionCase):
 
     def setUp(self):
         super().setUp()
         self.api_key_file = os.environ.get("OPENAI_API_KEY_FILE")
+        self.model = os.environ.get("OPENAI_MODEL")
         with open(self.api_key_file, "r") as f:
             self.api_key = f.read()
-        self.client = OpenAIClient(self.api_key)
+        self.client = OpenAIClient(self.api_key, self.model)
 
         self.partner_1 = self.env['res.partner'].create({
             'name': 'Test Partner 1',
@@ -28,5 +30,5 @@ class TestOpenAIClientLive(TransactionCase):
         records = env[model].search(domain)
         attributes = records[0]._fields.keys()
         logger.info(f"All attributes: {attributes}")
-        content = filter_attributes(self.client, query, model, attributes)
+        content = filter_attributes(self.client, query, attributes)
         logger.info(f"Filtered attributes: {content}")

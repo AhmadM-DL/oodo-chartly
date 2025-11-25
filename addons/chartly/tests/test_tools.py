@@ -1,3 +1,4 @@
+import base64
 from odoo.tests.common import TransactionCase
 from odoo.addons.chartly.core.openai import OpenAIClient
 from odoo.addons.chartly.core import tools
@@ -44,6 +45,7 @@ class TestOpenAIClientLive(TransactionCase):
         Payment = self.env["account.payment"]
 
         Payment.create({
+            "name": "Payment 1",
             "partner_id": self.customer_1.id,
             "amount": 500,
             "payment_type": "inbound",
@@ -51,6 +53,7 @@ class TestOpenAIClientLive(TransactionCase):
         })
 
         Payment.create({
+            "name": "Payment 2",
             "partner_id": self.customer_2.id,
             "amount": 200,
             "payment_type": "inbound",
@@ -58,6 +61,7 @@ class TestOpenAIClientLive(TransactionCase):
         })
 
         Payment.create({
+            "name": "Payment 3",
             "partner_id": self.customer_1.id,
             "amount": 300,
             "payment_type": "inbound",
@@ -65,6 +69,7 @@ class TestOpenAIClientLive(TransactionCase):
         })
 
         Payment.create({
+            "name": "Payment 4",
             "partner_id": self.customer_3.id,
             "amount": 900,
             "payment_type": "inbound",
@@ -74,11 +79,18 @@ class TestOpenAIClientLive(TransactionCase):
         # ------------------------------
         # Initialize OpenAI client and test env override
         # ------------------------------
-        self.client = OpenAIClient(api_key=self.api_key)
+        self.model = os.environ.get("OPENAI_MODEL")
+        self.client = OpenAIClient(api_key=self.api_key, model=self.model)
         self.override_env(self.env)
         self.override_openai_client(self.client)
         
     def test_query_return_a_plot(self):
-        query = "Plot a bar chart of the top payments in the last 30 days"
-        plot_binary = tools.query_returning_plot(query)
-        logger.info(plot_binary)
+        query = "Plot a bar chart of the top 3 customers by payments and their total payments in the last 30 days"
+        test_result = tools.query_returning_plot(query)
+        logger.info(test_result)
+        self.assertIn(tools.PLOT_TAG, test_result)
+    
+    def test_query_return_text(self):
+        query = "List the customers with their total payments that made payments in the last 30 days"
+        text_result = tools.query_returning_text(query)
+        logger.info(text_result)
