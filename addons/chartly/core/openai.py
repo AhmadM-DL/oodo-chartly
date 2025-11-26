@@ -16,10 +16,10 @@ PRICING = {
         'output_per_1M': 0.40,
         'cached_per_1M': 0.005
     },
-    'gpt-4': {
-        'input_per_1M': 30.00,
-        'output_per_1M': 60.00,
-        'cached_per_1M': 0      # no cached-token pricing provided
+    'gpt-4.1': {
+        'input_per_1M': 2.00,
+        'output_per_1M': 8.00,
+        'cached_per_1M': 0.5 
     },
     'gpt-3.5-turbo': {
         'input_per_1M': 0.50,
@@ -72,6 +72,7 @@ class OpenAIClient:
                     choice = result['choices'][0]
                    
                     usage = result.get('usage', {})
+                    logger.info(f"OpenAI API response usage: {usage}")
 
                     response_data = {
                         'success': True,
@@ -81,8 +82,6 @@ class OpenAIClient:
                         'model': result.get('model', self.model),
                         'finish_reason': choice.get('finish_reason')
                     }
-
-                    logger.info(f"OpenAI API response usage: {usage}")
                     
                     if 'tool_calls' in choice['message']:
                         response_data['tool_calls'] = choice['message']['tool_calls']
@@ -124,38 +123,63 @@ class OpenAIClient:
                 'error': f'Unexpected error: {str(e)}'
             }
     
-    def chat_completion_with_tools(self, messages, tools, max_tokens=1000, temperature=0.7, tool_choice='auto'):
+    def chat_completion_with_tools(self, messages, tools_descriptions, tools, max_tokens=1000, temperature=0.7, tool_choice='auto'):
         history = messages.copy()
+        tool_generated_image= None
         cost = 0
 
+        logger.debug(f"Passed messages: \n {history}")
+
         while True:
-            response = self.chat_completion(history, max_tokens=max_tokens, temperature=temperature, tools=tools, tool_choice=tool_choice)
+            logger.info(f"Calling chat completion")
+            response = self.chat_completion(history, max_tokens=max_tokens, temperature=temperature, tools=tools_descriptions, tool_choice=tool_choice)
             
+            logger.info(f"Chat completion response: {response}")
             if response.get('tool_calls') is None:
+                logger.info(f"Chat compeltion with tools ended")
                 response["cost"] = cost + response.get("cost", 0)
+                if tool_generated_image:
+                    response["image"] = tool_generated_image
                 return response
             
-            if len(response.get('tool_calls')) > 1:
-                logger.error("Multiple tool calls in a single response are not supported.")
-                response["success"] = False
-                response["error"] = "Multiple tool calls in a single response are not supported."
-                return response
+            # if len(response.get('tool_calls')) > 1:
+            #     logger.error("Multiple tool calls in a single response are not supported.")
+            #     response["cost"] = cost + response.get("cost", 0)
+            #     response["success"] = False
+            #     response["error"] = "Failed to call a tool" #"Multiple tool calls in a single response are not supported."
+            #     return response
             
             history = self.add_tool_call(history, response['tool_calls'][0])
             
             # Call the tool
-            tool_name = response['tool_calls'][0]['name']
-            tool_input = response['tool_calls'][0]['arguments']
+            tool_name = response['tool_calls'][0]['function']['name']
+            tool_input = response['tool_calls'][0]['function']['arguments']
+            tool_input = json.loads(tool_input)
 
-            if tool_name in [tool['function']['name'] for tool in tools]:
-                tool_response = self.execute_tool(tool_name, tool_input)
-                if tool_response.get('error'):
-                    response["success"] = False
-                    response["error"] = tool_response.get('error')
-                    return response
-                tool_text = tool_response.get('text')
+            if tool_name in [tool['function']['name'] for tool in tools_descriptions]:
+
+                tool_map = tools.get(tool_name, None)
+                # if not tool_map:
+                #     response["cost"] = cost + response.get("cost", 0)
+                #     response["success"] = False
+                #     response["error"] = "Failed to call a tool" # f"Tool {tool_name} is not in passed tools"
+                #     return response 
+                
+                tool_return_type = tool_map.get("return_type")
+                tool_callable = tool_map.get("tool_callable")
+                
+                tool_response = self.execute_tool(tool_callable, tool_input)
+
+                if tool_return_type=="text":
+                    tool_content = tool_response.get("text")
+                elif tool_return_type=="image":
+                    tool_content = tool_response.get("text")
+                    tool_generated_image = tool_response.get("image")
+                else:
+                    tool_content = tool_response
+                
                 cost += tool_response.get('cost', 0)
-                history = self.add_tool_response(history, response['tool_calls'][0].get('id'), tool_name, tool_text)
+                history = self.add_tool_response(history, response['tool_calls'][0].get('id'), tool_name, tool_content)
           
     def _parse_http_error(self, error):
         try:
@@ -169,9 +193,9 @@ class OpenAIClient:
         except Exception:
             return str(error)
         
-    def _compute_request_cost(model, usage):
-        input_tokens = usage.get('input_tokens', 0)
-        output_tokens = usage.get('output_tokens', 0)
+    def _compute_request_cost(self, model, usage):
+        input_tokens = usage.get('prompt_tokens', 0)
+        output_tokens = usage.get('completion_tokens', 0)
         cached_tokens = usage.get('prompt_tokens_details', {}).get('cached_tokens', 0)
         if model not in PRICING.keys():
             logger.warning(f"Model {model} not found in pricing list.")
@@ -181,7 +205,8 @@ class OpenAIClient:
         cached_tokens_cost = pricing['cached_per_1M'] * (cached_tokens / 1000000)
         output_tokens_cost = pricing['output_per_1M'] * (output_tokens / 1000000)
         cost = input_tokens_cost + cached_tokens_cost + output_tokens_cost
-        return round(cost, 3)
+        logger.info(f"Computed cost: {cost}")
+        return round(cost, 5)
     
     def execute_tool(self, function: Callable, tool_input):
         try:
@@ -189,7 +214,7 @@ class OpenAIClient:
             return result
         except Exception as e:
             logger.error(f"Error executing tool {function}: {str(e)}")
-            return {"text": f"Error executing tool {function}: {str(e)}", "cost": 0}
+            return {"text": f"Error executing tool {function}: {str(e)}", "error": True, "cost": 0}
 
     @staticmethod
     def prepare_chat_history(chat_messages):
@@ -216,39 +241,42 @@ class OpenAIClient:
     @staticmethod
     def add_tool_call(messages, tool_call):
         messages.append({
-            "role": "tool_call",
-            "tool_call_id": tool_call.get('id'),
-            "name": tool_call.get('name'),
-            "arguments": tool_call.get('arguments')
+            "role": "assistant",
+            "tool_calls": [{
+                "id": tool_call.get('id'),
+                "type": 'function',
+                "function":{
+                    "name": tool_call.get('function').get("name"),
+                    "arguments": tool_call.get('function').get("arguments")
+                }
+            }]
         })
         return messages
     
     @staticmethod
-    def add_tool_response(messages, tool_call_id, tool_name, tool_response):
+    def add_tool_response(messages, tool_call_id, tool_name, tool_response_content):
         messages.append({
             "role": "tool",
             "tool_call_id": tool_call_id,
             "name": tool_name,
-            "content": json.dumps(tool_response) if isinstance(tool_response, dict) else str(tool_response)
+            "content": tool_response_content
         })
         return messages
     
-    @staticmethod
-    def create_function_tool(function: Callable, name, description, parameters, required):
-        return {
-            "type": "function",
-            "function": {
-                "name": name,
-                "call": function,
-                "description": description,
-                "parameters":{
-                    "type": "object",
-                    "properties": parameters,
-                    "required": required
-                }
+def create_function_tool(name, description, parameters, required):
+    tool_description = {
+        "type": "function",
+        "function": {
+            "name": name,
+            "description": description,
+            "parameters":{
+                "type": "object",
+                "properties": parameters,
+                "required": required
             }
         }
-
+    }
+    return tool_description
 
 def get_openai_client(env):
     api_key = env['ir.config_parameter'].sudo().get_param('chartly.api_key')

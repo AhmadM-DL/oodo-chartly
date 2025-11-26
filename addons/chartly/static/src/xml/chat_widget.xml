@@ -20,6 +20,9 @@
                                     <div style="display: flex; justify-content: flex-start;">
                                         <div style="color: #333; padding: 12px 0; width: 100%;">
                                             <div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 0.95em;" t-esc="message.content"/>
+                                            <t t-if="message.image">
+                                                <img t-att-src="'data:image/png;base64,' + message.image" style="max-width: 100%; margin-top: 8px;" />
+                                            </t>
                                             <div style="font-size: 0.7em; opacity: 0.5; margin-top: 6px;" t-esc="message.created_at"/>
                                         </div>
                                     </div>

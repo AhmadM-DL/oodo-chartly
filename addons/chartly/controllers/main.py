@@ -3,6 +3,7 @@ from odoo.http import request
 import logging
 import os
 from odoo.addons.chartly.core.openai import get_openai_client
+from odoo.addons.chartly.core.tools import get_tools
 
 _logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ PROMPT_FILENAME = "main_prompt.txt"
 
 class ChartlyController(http.Controller):
 
-    def _get_system_message():
+    def _get_system_message(self):
         filepath = os.path.join(os.path.dirname(__file__), PROMPT_FILENAME)
         with open(filepath, "r") as f:
             system_prompt = f.read()
@@ -28,7 +29,7 @@ class ChartlyController(http.Controller):
                 return {'error': 'Chat not found'}
             
             # Update title if this is the first message
-            if not chat.messages and len(message_content.strip()) > 3:
+            if not chat.title and not chat.messages and len(message_content.strip()) > 3:
                 title = message_content.strip()[:50] + "..." if len(message_content.strip()) > 50 else message_content.strip()
                 chat.title = title
             
@@ -42,23 +43,41 @@ class ChartlyController(http.Controller):
             # Get AI response via OpenAIClient
             openai_client = get_openai_client(request.env)
             chat_history = openai_client.prepare_chat_history(chat.messages)
-            chat_history = openai_client.add_system_message(self._get_system_message())
-            chat_history = openai_client.add_user_message(message_content)
+            chat_history = openai_client.add_system_message(chat_history, self._get_system_message())
+            chat_history = openai_client.add_user_message(chat_history, message_content)
+            tools_map, tools_descriptions = get_tools()
             
-            ai_result = openai_client.chat_completion(chat_history, model="gpt-4")
+            ai_result = openai_client.chat_completion_with_tools(chat_history, tools_descriptions, tools_map)
             
             if ai_result.get('success'):
                 ai_content = ai_result.get('content', 'No response from AI.')
             else:
                 ai_content = f"Error: {ai_result.get('error', 'Unknown error')}"
             
-            # Create AI message
-            ai_message = request.env['chartly.chat.message'].create({
+            ai_message_dict = {
                 'chat_id': chat_id,
                 'content': ai_content,
-                'sender': 'ai'
+                'sender': 'ai',
+            }
+
+            if "image" in ai_result:
+                ai_message_dict.update({
+                'has_image': True,
+                'image': ai_result["image"]
             })
-            
+
+            # Create AI message
+            ai_message = request.env['chartly.chat.message'].create(ai_message_dict)
+
+            returned_ai_message = {
+                    'id': ai_message.id,
+                    'content': ai_message.content,
+                    'sender': ai_message.sender,
+                    'created_at': ai_message.created_at.isoformat() if ai_message.created_at else None
+                }
+            if ai_message.has_image:
+                returned_ai_message.update({"image": ai_message.image})
+
             return {
                 'success': True,
                 'user_message': {
@@ -67,12 +86,7 @@ class ChartlyController(http.Controller):
                     'sender': user_message.sender,
                     'created_at': user_message.created_at.isoformat() if user_message.created_at else None
                 },
-                'ai_message': {
-                    'id': ai_message.id,
-                    'content': ai_message.content,
-                    'sender': ai_message.sender,
-                    'created_at': ai_message.created_at.isoformat() if ai_message.created_at else None
-                }
+                'ai_message': returned_ai_message
             }
             
         except Exception as e:
@@ -89,15 +103,23 @@ class ChartlyController(http.Controller):
             messages = request.env['chartly.chat.message'].search([
                 ('chat_id', '=', int(chat_id))
             ], order='created_at asc')
-            
-            return {
-                'success': True,
-                'messages': [{
+
+            returned_messages = []
+            for msg in messages:
+                msg_dict = {
                     'id': msg.id,
                     'content': msg.content,
                     'sender': msg.sender,
                     'created_at': msg.created_at.isoformat() if msg.created_at else None
-                } for msg in messages]
+                }
+                if msg.has_image:
+                    msg_dict.update({"image": msg.image})
+                returned_messages.append(msg_dict)
+
+            
+            return {
+                'success': True,
+                'messages': returned_messages
             }
             
         except Exception as e:

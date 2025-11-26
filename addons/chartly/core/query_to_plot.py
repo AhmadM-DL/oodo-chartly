@@ -11,12 +11,12 @@ def get_query_to_plot_prompt():
         prompt = f.read()
     return prompt
         
-def query_to_plot(client, query, data_attributes: str)-> str:
+def query_to_plot(client, query, sql_query: str)-> str:
     prompt = get_query_to_plot_prompt()
     messages = []
     messages = client.add_system_message(messages, prompt)
-    messages = client.add_user_message(messages, f"Query: {query} \n Data Attributes: {data_attributes}")
-    response = client.chat_completion(messages, model="gpt-3.5-turbo", temperature= 0.3,)
+    messages = client.add_user_message(messages, f"Query: {query} \n SQL Query: {sql_query}")
+    response = client.chat_completion(messages, temperature= 0.3,)
     response_content = response.get("content")
     logger.info(f"Query to Plot response content:\n{response_content}")
     request_cost = response.get("cost")

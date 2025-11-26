@@ -1,5 +1,5 @@
 from odoo.tests.common import TransactionCase
-from odoo.addons.chartly.core.openai import OpenAIClient
+from odoo.addons.chartly.core.openai import OpenAIClient, create_function_tool
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from odoo.addons.chartly.core import tools
@@ -78,8 +78,7 @@ class TestExecuteQuery(TransactionCase):
         # ------------------------------
         # Prepare tools
         # ----------------------------
-        plot_tool = self.client.create_function_tool(
-            function=tools.query_returning_plot,
+        plot_tool = create_function_tool(
             name="query_returning_plot",
             description="Generates a plot image based on the provided natural language query.",
             parameters= {
@@ -90,8 +89,7 @@ class TestExecuteQuery(TransactionCase):
             }, 
             required=["query"]
         )
-        retrieve_tool = self.client.create_function_tool(
-            function=tools.query_returning_text,
+        retrieve_tool = create_function_tool(
             name="query_returning_text",
             description="Executes a natural language query and returns the results as text.",
             parameters= {
@@ -106,7 +104,17 @@ class TestExecuteQuery(TransactionCase):
             }, 
             required=["query"]
         )
-        self.tools = [plot_tool, retrieve_tool]
+        self.tools_descriptions = [plot_tool, retrieve_tool]
+        self.tools = {
+            "query_returning_text": {
+                "return_type": "text",
+                "tool_callable": tools.query_returning_text,
+            },
+            "query_returning_plot": {
+                "return_type": "image",
+                "tool_callable": tools.query_returning_plot,
+            }
+        }
 
     def _get_system_message(self):
         return"""You are an intelligent Odoo assistant specialized in invoicing and accounting.
@@ -127,7 +135,20 @@ Use a professional and helpful tone."""
         messages = []
         messages = self.client.add_system_message(messages, self._get_system_message())
         messages = self.client.add_user_message(messages, query)
-        result = self.client.chat_completion_with_tools(messages, self.tools)
+        result = self.client.chat_completion_with_tools(messages, self.tools_descriptions, self.tools)
+        if not result['success']:
+            logger.info(f"Error executing request: {result['error']}")
         self.assertTrue(result['success'])
-        self.assertIn(tools.PLOT_TAG, result['content'])
+        self.assertTrue("image" in result)
         logger.info(f"Plot tool response content: {result['content']} \n Cost: {result.get('cost')}")
+
+    def test_call_retrieve_tool(self):
+        query = "Give the top 3 customers by payments and their total payments in the last 30 days"
+        messages = []
+        messages = self.client.add_system_message(messages, self._get_system_message())
+        messages = self.client.add_user_message(messages, query)
+        result = self.client.chat_completion_with_tools(messages, self.tools_descriptions, self.tools)
+        if not result['success']:
+            logger.info(f"Error executing request: {result['error']}")
+        self.assertTrue(result['success'])
+        logger.info(f"Retrieve tool response content: {result['content']} \n Cost: {result.get('cost')}")

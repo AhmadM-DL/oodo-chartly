@@ -17,7 +17,7 @@ def nl_to_model(client, text: str)-> list[str]:
     messages = []
     messages = client.add_system_message(messages, prompt)
     messages = client.add_user_message(messages, f"Query: {text}")
-    response = client.chat_completion(messages, model="gpt-3.5-turbo", temperature= 0.3,)
+    response = client.chat_completion(messages, temperature= 0.3,)
     response_content = response.get("content")
     response_content = json.loads(response_content)
     models = response_content.get("models")

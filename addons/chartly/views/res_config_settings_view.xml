@@ -15,6 +15,11 @@
                         placeholder="Enter your OpenAI API Key here"
                         style="width: 100%; min-width: 4rem;" />
                     </setting>
+                    <setting string="OpenAI API Model">
+                        <field 
+                        name="model" 
+                        style="width: 100%; min-width: 4rem;" />
+                    </setting>
                 </block>
             </app>
             </xpath>

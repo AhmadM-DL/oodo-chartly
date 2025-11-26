@@ -21,7 +21,7 @@ def nl_to_sql(client, query: str, models: list[str], fields: dict)-> dict:
         fields_str += f"# {k}: {v}\n"
     messages = client.add_user_message(messages, f"Models: {models}\nFields:\n{fields_str}")
     messages = client.add_user_message(messages, f"Query: {query}")
-    response = client.chat_completion(messages, model="gpt-4", temperature= 0.3,)
+    response = client.chat_completion(messages, temperature= 0.3,)
     sql_query = response.get("content")
     request_cost = response.get("cost")
     return {"sql_query": sql_query, "cost": request_cost}
