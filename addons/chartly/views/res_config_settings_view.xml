@@ -12,6 +12,7 @@
                     <setting string="OpenAI API Key">
                         <field 
                         name="api_key" 
+                        password="True"
                         placeholder="Enter your OpenAI API Key here"
                         style="width: 100%; min-width: 4rem;" />
                     </setting>

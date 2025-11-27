@@ -5,7 +5,7 @@ class Chat(models.Model):
     _description = "Chartly Chat"
     _order = "created_at desc"
 
-    title = fields.Char(string="Title", required=True, default="New Chat")
+    title = fields.Char(string="Title", default="New Chat")
     created_at = fields.Datetime(string="Created At", default=fields.Datetime.now)
     messages = fields.One2many(
         comodel_name="chartly.chat.message",

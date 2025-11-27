@@ -15,6 +15,7 @@ Rules:
     import matplotlib.pyplot as plt
     import base64
     from io import BytesIO
+- All plots must be readable and uncluttered,always use and plt.tight_layout(). Use pctdistance & labeldistanc for pie charts. 
 - Close figures using plt.close() to prevent leaks.
 
 Return only the script as it is i.e. start with the imports then the function.

@@ -158,3 +158,102 @@ class ChartlyController(http.Controller):
         except Exception as e:
             _logger.error(f"Error in create_chat: {str(e)}")
             return {'success': False, 'error': str(e)}
+
+    @http.route('/chartly/update_title', type='json', auth='user', methods=['POST'], csrf=False)
+    def update_title(self, chat_id, title):
+        """Update chat title"""
+        try:
+            if not chat_id:
+                return {'success': False, 'error': 'Missing chat_id parameter'}
+            
+            chat = request.env['chartly.chat'].browse(int(chat_id))
+            if not chat.exists():
+                return {'success': False, 'error': 'Chat not found'}
+            
+            chat.title = title or 'Untitled Chat'
+            
+            return {
+                'success': True,
+                'title': chat.title
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error in update_title: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/chartly/get_chat_info', type='json', auth='user', methods=['POST'], csrf=False)
+    def get_chat_info(self, chat_id):
+        """Get chat info (title, created_at, total_cost)"""
+        try:
+            if not chat_id:
+                return {'success': False, 'error': 'Missing chat_id parameter'}
+            
+            chat = request.env['chartly.chat'].browse(int(chat_id))
+            if not chat.exists():
+                return {'success': False, 'error': 'Chat not found'}
+            
+            return {
+                'success': True,
+                'title': chat.title,
+                'created_at': chat.created_at.strftime('%Y-%m-%d %H:%M') if chat.created_at else '',
+                'total_cost': chat.total_cost or 0,
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error in get_chat_info: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/chartly/duplicate_chat', type='json', auth='user', methods=['POST'], csrf=False)
+    def duplicate_chat(self, chat_id):
+        """Duplicate a chat"""
+        try:
+            if not chat_id:
+                return {'success': False, 'error': 'Missing chat_id parameter'}
+            
+            chat = request.env['chartly.chat'].browse(int(chat_id))
+            if not chat.exists():
+                return {'success': False, 'error': 'Chat not found'}
+            
+            new_chat = chat.copy({'title': f"{chat.title} (copy)"})
+            
+            return {
+                'success': True,
+                'chat_id': new_chat.id,
+                'title': new_chat.title
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error in duplicate_chat: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/chartly/delete_chat', type='json', auth='user', methods=['POST'], csrf=False)
+    def delete_chat(self, chat_id):
+        """Delete a chat"""
+        try:
+            if not chat_id:
+                return {'success': False, 'error': 'Missing chat_id parameter'}
+            
+            chat = request.env['chartly.chat'].browse(int(chat_id))
+            if not chat.exists():
+                return {'success': False, 'error': 'Chat not found'}
+            
+            chat.unlink()
+            
+            return {'success': True}
+            
+        except Exception as e:
+            _logger.error(f"Error in delete_chat: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/chartly/delete_all_chats', type='json', auth='user', methods=['POST'], csrf=False)
+    def delete_all_chats(self):
+        """Delete all chats"""
+        try:
+            chats = request.env['chartly.chat'].search([])
+            chats.unlink()
+            
+            return {'success': True, 'deleted_count': len(chats)}
+            
+        except Exception as e:
+            _logger.error(f"Error in delete_all_chats: {str(e)}")
+            return {'success': False, 'error': str(e)}
