@@ -9,6 +9,7 @@ Your job:
     - The function returns the binary buffer as a base64 string.
 
 Rules:
+- Return ONLY the Python code, NO markdown formatting (no ```python or ``` blocks)
 - Use matplotlib only.
 - The function MUST include:
     import matplotlib.pyplot as plt

@@ -20,7 +20,8 @@
         ],
     },
     "demo": [
-        "demo/demo_data.xml",
+        "demo/accounting_demo_data.xml",
+        "demo/chat_demo_data.xml",
     ],
     "installable": True,
     "application": True,

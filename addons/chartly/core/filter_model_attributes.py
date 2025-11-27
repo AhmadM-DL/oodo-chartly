@@ -14,5 +14,6 @@ def filter_attributes(client, query: str, attributes: list)-> dict:
     messages = client.add_user_message(messages, prompt)
     response = client.chat_completion(messages, temperature= 0.3)
     response_content = response.get("content").strip().split("\n")
+    response_content = [attr.strip() for attr in response_content if attr.strip()]
     request_cost = response.get("cost")
     return {"attributes": response_content, "cost": request_cost}

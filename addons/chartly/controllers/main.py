@@ -49,6 +49,9 @@ class ChartlyController(http.Controller):
             
             ai_result = openai_client.chat_completion_with_tools(chat_history, tools_descriptions, tools_map)
             
+            # Extract cost from AI result
+            ai_cost = ai_result.get('cost', 0)
+            
             if ai_result.get('success'):
                 ai_content = ai_result.get('content', 'No response from AI.')
             else:
@@ -58,6 +61,7 @@ class ChartlyController(http.Controller):
                 'chat_id': chat_id,
                 'content': ai_content,
                 'sender': 'ai',
+                'cost': ai_cost,
             }
 
             if "image" in ai_result:
@@ -73,10 +77,14 @@ class ChartlyController(http.Controller):
                     'id': ai_message.id,
                     'content': ai_message.content,
                     'sender': ai_message.sender,
-                    'created_at': ai_message.created_at.isoformat() if ai_message.created_at else None
+                    'created_at': ai_message.created_at.isoformat() if ai_message.created_at else None,
+                    'cost': ai_message.cost or 0,
                 }
             if ai_message.has_image:
                 returned_ai_message.update({"image": ai_message.image})
+
+            # Refresh total_cost
+            chat.invalidate_recordset(['total_cost'])
 
             return {
                 'success': True,
@@ -84,9 +92,11 @@ class ChartlyController(http.Controller):
                     'id': user_message.id,
                     'content': user_message.content,
                     'sender': user_message.sender,
-                    'created_at': user_message.created_at.isoformat() if user_message.created_at else None
+                    'created_at': user_message.created_at.isoformat() if user_message.created_at else None,
+                    'cost': 0,
                 },
-                'ai_message': returned_ai_message
+                'ai_message': returned_ai_message,
+                'total_cost': chat.total_cost or 0,
             }
             
         except Exception as e:
@@ -110,16 +120,21 @@ class ChartlyController(http.Controller):
                     'id': msg.id,
                     'content': msg.content,
                     'sender': msg.sender,
-                    'created_at': msg.created_at.isoformat() if msg.created_at else None
+                    'created_at': msg.created_at.isoformat() if msg.created_at else None,
+                    'cost': msg.cost or 0,
                 }
                 if msg.has_image:
                     msg_dict.update({"image": msg.image})
                 returned_messages.append(msg_dict)
 
+            # Get total cost for the chat
+            chat = request.env['chartly.chat'].browse(int(chat_id))
+            total_cost = chat.total_cost if chat.exists() else 0
             
             return {
                 'success': True,
-                'messages': returned_messages
+                'messages': returned_messages,
+                'total_cost': total_cost,
             }
             
         except Exception as e:

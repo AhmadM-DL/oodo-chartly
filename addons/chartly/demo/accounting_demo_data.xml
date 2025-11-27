@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ========================================================= -->
+        <!-- 1. PARTNERS (Real Company Names)                          -->
+        <!-- ========================================================= -->
+        <record id="partner_adobe" model="res.partner">
+            <field name="name">Adobe Inc.</field>
+            <field name="is_company">True</field>
+            <field name="customer_rank">1</field>
+            <field name="email">accounts@adobe.com</field>
+            <field name="street">345 Park Avenue</field>
+            <field name="city">San Jose</field>
+            <field name="zip">95110</field>
+            <field name="country_id" ref="base.us"/>
+        </record>
+
+        <record id="partner_wework" model="res.partner">
+            <field name="name">WeWork</field>
+            <field name="is_company">True</field>
+            <field name="customer_rank">1</field>
+            <field name="email">locations@wework.com</field>
+            <field name="street">12 East 49th Street</field>
+            <field name="city">New York</field>
+            <field name="zip">10017</field>
+            <field name="country_id" ref="base.us"/>
+        </record>
+
+        <record id="partner_tesla" model="res.partner">
+            <field name="name">Tesla Energy</field>
+            <field name="is_company">True</field>
+            <field name="customer_rank">1</field>
+            <field name="supplier_rank">1</field>
+            <field name="email">energy-billing@tesla.com</field>
+            <field name="city">Austin</field>
+            <field name="country_id" ref="base.us"/>
+        </record>
+
+        <record id="partner_grainger" model="res.partner">
+            <field name="name">W.W. Grainger</field>
+            <field name="is_company">True</field>
+            <field name="supplier_rank">1</field>
+            <field name="email">orders@grainger.com</field>
+            <field name="street">100 Grainger Parkway</field>
+            <field name="city">Lake Forest</field>
+        </record>
+
+        <record id="partner_consultant" model="res.partner">
+            <field name="name">Sarah Jenkins (Consultant)</field>
+            <field name="is_company">False</field>
+            <field name="customer_rank">1</field>
+            <field name="email">sarah.j@freelance.net</field>
+        </record>
+
+        <!-- ========================================================= -->
+        <!-- 2. CUSTOMER INVOICES (Posted - Expanded Data)             -->
+        <!-- ========================================================= -->
+
+        <!-- Invoice 1: Adobe (Posted) -->
+        <record id="inv_adobe_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=85)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'UX/UI Design Workshop',
+                    'quantity': 40,
+                    'price_unit': 220.0,
+                }),
+                (0, 0, {
+                    'name': 'Software Licensing (Annual)',
+                    'quantity': 1,
+                    'price_unit': 15000.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 2: WeWork (Posted) -->
+        <record id="inv_wework_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=70)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Network Cabling - Floor 4',
+                    'quantity': 500,
+                    'price_unit': 2.50,
+                }),
+                (0, 0, {
+                    'name': 'Server Rack Installation',
+                    'quantity': 2,
+                    'price_unit': 1200.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 3: Tesla (Posted) -->
+        <record id="inv_tesla_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=65)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Industrial Cooling Fans',
+                    'quantity': 15,
+                    'price_unit': 350.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 4: Sarah Jenkins (Posted) -->
+        <record id="inv_indiv_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_consultant"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=60)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Laptop Repair Service',
+                    'quantity': 1,
+                    'price_unit': 180.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 5: Adobe (Posted) -->
+        <record id="inv_adobe_2" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=55)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Cloud Storage Overage',
+                    'quantity': 5,
+                    'price_unit': 500.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 6: WeWork (Posted) -->
+        <record id="inv_wework_2" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=50)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Office Chairs - Bulk Order',
+                    'quantity': 50,
+                    'price_unit': 185.0,
+                }),
+                (0, 0, {
+                    'name': 'Assembly Service',
+                    'quantity': 25,
+                    'price_unit': 40.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 7: Tesla (Posted) -->
+        <record id="inv_tesla_2" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=45)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Safety Sensors',
+                    'quantity': 100,
+                    'price_unit': 75.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 8: Adobe (Posted) -->
+        <record id="inv_adobe_3" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=40)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Marketing Consultation - Q3',
+                    'quantity': 1,
+                    'price_unit': 5000.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 9: WeWork (Posted) -->
+        <record id="inv_wework_3" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=35)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Breakroom Supplies',
+                    'quantity': 1,
+                    'price_unit': 850.0,
+                }),
+                (0, 0, {
+                    'name': 'Coffee Machine Lease',
+                    'quantity': 3,
+                    'price_unit': 150.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 10: Sarah Jenkins (Posted) -->
+        <record id="inv_indiv_2" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_consultant"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Data Recovery',
+                    'quantity': 1,
+                    'price_unit': 450.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 11: Adobe (Posted) -->
+        <record id="inv_adobe_4" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=25)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Custom API Development',
+                    'quantity': 80,
+                    'price_unit': 180.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Invoice 12: WeWork (Posted) -->
+        <record id="inv_wework_4" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=20)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Security System Audit',
+                    'quantity': 1,
+                    'price_unit': 2500.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- ========================================================= -->
+        <!-- 3. CUSTOMER INVOICES (Draft - Recent Data)                -->
+        <!-- ========================================================= -->
+
+        <record id="inv_draft_tesla_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Charging Station Components', 'quantity': 12, 'price_unit': 1200.0})
+            ]"/>
+        </record>
+
+        <record id="inv_draft_adobe_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=8)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Q4 Strategy Session', 'quantity': 1, 'price_unit': 3500.0})
+            ]"/>
+        </record>
+
+        <record id="inv_draft_grainger_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=5)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Logistics Optimization', 'quantity': 1, 'price_unit': 8500.0})
+            ]"/>
+        </record>
+
+        <record id="inv_draft_wework_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=3)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Monitor Mounts', 'quantity': 20, 'price_unit': 89.99}),
+                (0, 0, {'name': 'HDMI Cables 10ft', 'quantity': 50, 'price_unit': 12.50})
+            ]"/>
+        </record>
+
+        <record id="inv_draft_consultant_1" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_consultant"/>
+            <field name="invoice_date" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Printer Setup', 'quantity': 1, 'price_unit': 95.0})
+            ]"/>
+        </record>
+
+        <record id="inv_draft_tesla_2" model="account.move">
+            <field name="move_type">out_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Solar Panel Brackets', 'quantity': 500, 'price_unit': 18.25})
+            ]"/>
+        </record>
+
+        <!-- ========================================================= -->
+        <!-- 4. VENDOR BILLS (Supplies & Services)                     -->
+        <!-- ========================================================= -->
+
+        <!-- Bill 1: W.W. Grainger (Posted) -->
+        <record id="bill_grainger_1" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=80)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Warehouse Racking System',
+                    'quantity': 1,
+                    'price_unit': 4200.0,
+                }),
+                (0, 0, {
+                    'name': 'Freight Shipping',
+                    'quantity': 1,
+                    'price_unit': 350.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Bill 2: Tesla (Acting as Vendor for Battery Packs) -->
+        <record id="bill_tesla_1" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=75)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Powerwall Unit Backup',
+                    'quantity': 2,
+                    'price_unit': 6500.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Bill 3: W.W. Grainger (Posted) -->
+        <record id="bill_grainger_2" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=60)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Safety Helmets',
+                    'quantity': 20,
+                    'price_unit': 25.50,
+                }),
+                (0, 0, {
+                    'name': 'High-Vis Vests',
+                    'quantity': 20,
+                    'price_unit': 12.00,
+                })
+            ]"/>
+        </record>
+
+        <!-- Bill 4: Adobe (Acting as Vendor for Creative Cloud) -->
+        <record id="bill_adobe_1" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=50)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Enterprise Subscription - 1 Year',
+                    'quantity': 1,
+                    'price_unit': 12000.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Bill 5: W.W. Grainger (Draft) -->
+        <record id="bill_grainger_3" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=15)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Hydraulic Lift Table',
+                    'quantity': 1,
+                    'price_unit': 1850.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Bill 6: WeWork (Rent Bill) -->
+        <record id="bill_wework_1" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Hot Desk Monthly Rent',
+                    'quantity': 5,
+                    'price_unit': 350.0,
+                })
+            ]"/>
+        </record>
+
+        <record id="bill_grainger_4" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=5)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Power Drills', 'quantity': 5, 'price_unit': 120.0}),
+                (0, 0, {'name': 'Drill Bit Sets', 'quantity': 10, 'price_unit': 45.0})
+            ]"/>
+        </record>
+
+        <record id="bill_tesla_2" model="account.move">
+            <field name="move_type">in_invoice</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {'name': 'Grid Maintenance Service', 'quantity': 1, 'price_unit': 900.0})
+            ]"/>
+        </record>
+
+        <!-- ========================================================= -->
+        <!-- 5. PAYMENTS (Inbound & Outbound)                          -->
+        <!-- ========================================================= -->
+
+        <!-- Adobe Pays Us -->
+        <record id="pay_adobe_1" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="amount">23800.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=80)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- We Pay Grainger -->
+        <record id="pay_grainger_1" model="account.payment">
+            <field name="payment_type">outbound</field>
+            <field name="partner_type">supplier</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="amount">4550.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=75)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- WeWork Pays Us -->
+        <record id="pay_wework_1" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="amount">3650.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=65)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Tesla Pays Us -->
+        <record id="pay_tesla_1" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="amount">5250.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=60)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- We Pay Tesla (for Batteries) -->
+        <record id="pay_tesla_out_1" model="account.payment">
+            <field name="payment_type">outbound</field>
+            <field name="partner_type">supplier</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="amount">13000.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=70)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Sarah Pays Us -->
+        <record id="pay_indiv_1" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_consultant"/>
+            <field name="amount">180.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=58)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Adobe Pays Us Again -->
+        <record id="pay_adobe_2" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="amount">2500.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=50)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- We Pay Grainger Again -->
+        <record id="pay_grainger_2" model="account.payment">
+            <field name="payment_type">outbound</field>
+            <field name="partner_type">supplier</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="amount">750.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=55)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- WeWork Pays Us -->
+        <record id="pay_wework_2" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="amount">10250.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=45)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- We Pay Adobe (Subscription) -->
+        <record id="pay_adobe_out_1" model="account.payment">
+            <field name="payment_type">outbound</field>
+            <field name="partner_type">supplier</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="amount">12000.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=48)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Additional Payments for variety -->
+        <record id="pay_tesla_2" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="amount">7500.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=40)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="pay_adobe_3" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="amount">5000.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=35)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="pay_wework_3" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="amount">1300.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=30)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="pay_indiv_2" model="account.payment">
+            <field name="payment_type">inbound</field>
+            <field name="partner_type">customer</field>
+            <field name="partner_id" ref="partner_consultant"/>
+            <field name="amount">450.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=25)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="pay_wework_out_1" model="account.payment">
+            <field name="payment_type">outbound</field>
+            <field name="partner_type">supplier</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="amount">1750.00</field>
+            <field name="date" eval="(DateTime.now() - timedelta(days=5)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- ========================================================= -->
+        <!-- 6. CREDIT NOTES (Refunds & Adjustments)                   -->
+        <!-- ========================================================= -->
+
+        <!-- Refund to Adobe -->
+        <record id="cn_adobe_1" model="account.move">
+            <field name="move_type">out_refund</field>
+            <field name="partner_id" ref="partner_adobe"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=28)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Refund - Unused Software Licenses',
+                    'quantity': 2,
+                    'price_unit': 220.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Refund to WeWork -->
+        <record id="cn_wework_1" model="account.move">
+            <field name="move_type">out_refund</field>
+            <field name="partner_id" ref="partner_wework"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=12)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Refund - Damaged Desk Surface',
+                    'quantity': 1,
+                    'price_unit': 185.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Refund to Tesla -->
+        <record id="cn_tesla_1" model="account.move">
+            <field name="move_type">out_refund</field>
+            <field name="partner_id" ref="partner_tesla"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=2)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Volume Discount Adjustment',
+                    'quantity': 1,
+                    'price_unit': 450.0,
+                })
+            ]"/>
+        </record>
+
+        <!-- Refund FROM Grainger (Vendor Refund) -->
+        <record id="cn_grainger_1" model="account.move">
+            <field name="move_type">in_refund</field>
+            <field name="partner_id" ref="partner_grainger"/>
+            <field name="invoice_date" eval="(DateTime.now() - timedelta(days=18)).strftime('%Y-%m-%d')"/>
+            <field name="invoice_line_ids" eval="[
+                (0, 0, {
+                    'name': 'Return - Defective Drill',
+                    'quantity': 1,
+                    'price_unit': 120.0,
+                })
+            ]"/>
+        </record>
+
+    </data>
+</odoo>
