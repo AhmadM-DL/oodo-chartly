@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.utils import extract_script_as_fct
 
+@tagged('unit', 'utils')
 class TestSafeDomainEval(TransactionCase):
 
     def test_script_extraction(self):

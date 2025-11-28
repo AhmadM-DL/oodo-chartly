@@ -3,7 +3,7 @@ services:
     image: odoo:17
     ports:
       - "8069:8069"
-    command: bash -c 'pip install -r /mnt/extra-addons/chartly/requirements.txt && odoo -c /etc/odoo/odoo.conf -u base --logfile='
+    command: bash -c 'pip install -r /mnt/extra-addons/chartly/requirements.txt && odoo -c /etc/odoo/odoo.conf -u base,chartly --logfile= --without-demo=all'
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons

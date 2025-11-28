@@ -1,4 +1,5 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.nl_to_model import nl_to_model
 from odoo.addons.chartly.core.openai import OpenAIClient
 import csv, os
@@ -6,18 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Hard examples
-
-# Query: Generate a chart of taxes collected per tax group
-# Expected: ['account.tax.repartition.line', 'account.tax.group']
-# Got: ['account.tax', 'account.tax.group']
-# “Taxes collected” → LLM interprets it as general account.tax objects (the tax definitions) rather than how taxes are actually applied and summed per move line, which is account.tax.repartition.line.
-# account.tax.repartition.line is more technical / implementation-specific, and the LLM doesn’t “know” that unless the prompt explicitly teaches it.
-
-# Query: Generate a chart of taxes collected per tax group
-# Expected: ['account.tax.repartition.line', 'account.tax.group']
-# Got: ['account.tax', 'account.tax.group', 'account.tax.repartition.line']
-
+@tagged('unit', 'billed', 'nl_to_model')
 class TestNLToModelCSV(TransactionCase):
 
     def setUp(self):

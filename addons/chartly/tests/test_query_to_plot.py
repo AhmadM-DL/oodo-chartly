@@ -1,4 +1,5 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.openai import OpenAIClient
 from odoo.addons.chartly.core.query_to_plot import query_to_plot
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -8,6 +9,7 @@ import os
 from logging import getLogger
 logger = getLogger(__name__)
 
+@tagged('unit', 'billed', 'query_to_plot')
 class TestOpenAIClientLive(TransactionCase):
 
     def setUp(self):

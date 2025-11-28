@@ -1,4 +1,5 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.openai import OpenAIClient
 from odoo.addons.chartly.core.filter_model_attributes import filter_attributes
 import os
@@ -6,7 +7,7 @@ import os
 from logging import getLogger
 logger = getLogger(__name__)
 
-
+@tagged('unit', 'billed', 'filter_attributes')
 class TestOpenAIClientLive(TransactionCase):
 
     def setUp(self):

@@ -1,5 +1,6 @@
 import base64
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.openai import OpenAIClient
 from odoo.addons.chartly.core import tools
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -9,6 +10,7 @@ import os
 from logging import getLogger
 logger = getLogger(__name__)
 
+@tagged('integration', 'billed', 'tools')
 class TestOpenAIClientLive(TransactionCase):
 
     def override_openai_client(self, client):

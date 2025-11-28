@@ -21,9 +21,6 @@ def is_valid_python(code: str) -> bool:
 
 
 def is_safe_code(code: str) -> bool:
-    if "def build_plot" not in code:
-        logger.warning("Code does not define build_plot function")
-        return False
 
     forbidden_imports = [
         r"\bimport\s+os\b",

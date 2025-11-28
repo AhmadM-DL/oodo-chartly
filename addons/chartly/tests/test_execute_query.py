@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 from odoo.addons.chartly.core.execute_query import execute_query
 
+@tagged('unit', 'execute_query')
 class TestExecuteQuery(TransactionCase):
 
     def setUp(self):
