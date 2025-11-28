@@ -1,6 +1,6 @@
 # 📊 Chartly
 
-![Chartly Screenshot](./assets/Odoo Chartly.png)
+![Chartly Screenshot](https://github.com/AhmadM-DL/oodo-chartly/blob/main/assets/Odoo%20Chartly.png)
 
 ## 📝 Description
 
