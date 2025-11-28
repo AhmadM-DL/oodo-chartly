@@ -7,6 +7,7 @@
                 <tree>
                     <field name="title" />
                     <field name="message_count" />
+                    <field name="total_cost" string="Cost ($)" />
                     <field name="created_at" />
                 </tree>
             </field>
@@ -16,16 +17,11 @@
             <field name="name">chartly.chat.form</field>
             <field name="model">chartly.chat</field>
             <field name="arch" type="xml">
-                <form>
-                    <div style="position: sticky; top: 0; z-index: 100; background: #ffffff; border-bottom: 1px solid #e0e0e0; padding: 2px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin: -16px -16px 0 -16px;">
-                        <div class="oe_title" style="margin: 0;">
-                            <h3 style="margin: 0; font-size: 1.5em;">
-                                <field name="title" placeholder="Chat Title" />
-                            </h3>
-                        </div>
-                        <field name="created_at" readonly="1" style="font-size: 0.9em; color: #666;" />
-                    </div>
-                    <div class="o_chat_widget_container" />
+                <form class="chartly-chat-form">
+                    <field name="title" invisible="1"/>
+                    <field name="created_at" invisible="1"/>
+                    <field name="total_cost" invisible="1"/>
+                    <div class="o_chat_widget_container" style="margin: -16px;" />
                 </form>
             </field>
         </record>

@@ -14,13 +14,17 @@
     ],
     "assets": {
         "web.assets_backend": [
+            "chartly/static/src/scss/chartly_style.scss",
             "chartly/static/src/js/chat_widget.js",
             "chartly/static/src/js/chat_form_controller.js",
+            "chartly/static/src/js/chat_list_controller.js",
             "chartly/static/src/xml/chat_widget.xml",
         ],
     },
     "demo": [
-        "demo/demo_data.xml",
+        "demo/accounting_demo_data.xml",
+        "demo/post_demo_invoices.xml",
+        "demo/chat_demo_data.xml",
     ],
     "installable": True,
     "application": True,

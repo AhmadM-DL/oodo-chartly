@@ -7,7 +7,7 @@ class ChatMessage(models.Model):
 
     chat_id = fields.Many2one("chartly.chat", string="Chat", required=True, ondelete="cascade")
     content = fields.Text(string="Content", required=True)
-    cost = fields.Float(string="Cost", default=0.0)
+    cost = fields.Float(string="Cost", default=0.0, digits=(16, 6))
     sender = fields.Selection(
         [("user", "User"), ("ai", "AI")],
         string="Sender",

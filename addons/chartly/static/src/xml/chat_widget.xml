@@ -2,15 +2,379 @@
 <templates id="template" xml:space="preserve">
     
     <t t-name="chartly.chat_widget">
-        <div class="chat-widget-container" style="min-height: calc(100vh - 200px); display: flex; flex-direction: column; background: #ffffff;">
-            <div class="chat-messages" style="flex: 1; overflow-y: auto; padding: 24px 0; padding-bottom: 120px;">
-                <div style="max-width: 50%; margin: 0 auto;">
+        <style>
+            /* Hide Odoo native control panel/header */
+            .o_control_panel {
+                display: none !important;
+            }
+            .o_cp_top, .o_cp_bottom {
+                display: none !important;
+            }
+            
+            .chat-messages-scrollable::-webkit-scrollbar {
+                display: none;
+            }
+            .chat-messages-scrollable {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .o_form_view_container::-webkit-scrollbar {
+                display: none !important;
+            }
+            .o_form_view_container {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+            .o_content::-webkit-scrollbar {
+                display: none !important;
+            }
+            .o_content {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+            .o_form_renderer::-webkit-scrollbar {
+                display: none !important;
+            }
+            .o_form_renderer {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+            .o_chat_widget_container::-webkit-scrollbar {
+                display: none !important;
+            }
+            .o_chat_widget_container {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+            
+            .loading-dots {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .loading-dots span {
+                width: 8px;
+                height: 8px;
+                background-color: #888;
+                border-radius: 50%;
+                animation: bounce 1.4s infinite ease-in-out both;
+            }
+            .loading-dots span:nth-child(1) {
+                animation-delay: -0.32s;
+            }
+            .loading-dots span:nth-child(2) {
+                animation-delay: -0.16s;
+            }
+            .loading-dots span:nth-child(3) {
+                animation-delay: 0s;
+            }
+            @keyframes bounce {
+                0%, 80%, 100% {
+                    transform: scale(0);
+                }
+                40% {
+                    transform: scale(1);
+                }
+            }
+            
+            .send-button-icon {
+                font-size: 16px;
+                color: #ffffff;
+            }
+            .send-button-square {
+                width: 14px;
+                height: 14px;
+                background-color: #ffffff;
+                border-radius: 2px;
+            }
+            
+            .chartly-header {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: #ffffff;
+                border-bottom: 1px solid #e0e0e0;
+                padding: 12px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+            
+            .chartly-header-btn {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                max-width: 36px;
+                max-height: 36px;
+                padding: 0;
+                background: #1a1a1a;
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+                position: relative;
+            }
+            
+            .chartly-header-btn:hover {
+                background: #333;
+            }
+            
+            .chartly-header-btn svg {
+                width: 18px;
+                height: 18px;
+                fill: white;
+            }
+            
+            /* Dropdown menu styles */
+            .chartly-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+            
+            .chartly-dropdown-menu {
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                margin-top: 8px;
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                min-width: 150px;
+                z-index: 1000;
+                overflow: hidden;
+            }
+            
+            .chartly-dropdown-menu.show {
+                display: block;
+            }
+            
+            .chartly-dropdown-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                color: #333;
+                font-size: 0.9em;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+            }
+            
+            .chartly-dropdown-item:hover {
+                background: #f5f5f5;
+            }
+            
+            .chartly-dropdown-item.danger {
+                color: #dc3545;
+            }
+            
+            .chartly-dropdown-item.danger:hover {
+                background: #fff5f5;
+            }
+            
+            .chartly-dropdown-item svg {
+                width: 16px;
+                height: 16px;
+                fill: currentColor;
+            }
+            
+            .chartly-title-input {
+                border: none;
+                background: transparent;
+                font-size: 1.1em;
+                font-weight: 500;
+                color: #333;
+                padding: 4px 8px;
+                border-radius: 4px;
+                min-width: 150px;
+                max-width: 300px;
+            }
+            
+            .chartly-title-input:focus {
+                outline: none;
+                background: #f5f5f5;
+            }
+            
+            .chartly-title-input::placeholder {
+                color: #999;
+            }
+            
+            .chartly-header-info {
+                font-size: 0.8em;
+                color: #888;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+            
+            .chartly-cost-badge {
+                background: #f5f5f5;
+                padding: 4px 10px;
+                border-radius: 12px;
+            }
+            
+            /* Confirmation Modal Styles */
+            .chartly-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s ease-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            .chartly-modal {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                max-width: 400px;
+                width: 90%;
+                animation: slideIn 0.2s ease-out;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(-20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            .chartly-modal-header {
+                padding: 20px 24px 12px;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .chartly-modal-title {
+                margin: 0;
+                font-size: 1.2em;
+                font-weight: 600;
+                color: #333;
+            }
+            
+            .chartly-modal-body {
+                padding: 16px 24px 24px;
+                color: #555;
+                font-size: 0.95em;
+                line-height: 1.5;
+            }
+            
+            .chartly-modal-footer {
+                padding: 16px 24px 20px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                border-top: 1px solid #eee;
+            }
+            
+            .chartly-modal-btn {
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 0.9em;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .chartly-modal-btn-cancel {
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+                color: #555;
+            }
+            
+            .chartly-modal-btn-cancel:hover {
+                background: #eee;
+            }
+            
+            .chartly-modal-btn-danger {
+                background: #dc3545;
+                border: none;
+                color: white;
+            }
+            
+            .chartly-modal-btn-danger:hover {
+                background: #c82333;
+            }
+        </style>
+        <div class="chat-widget-container" style="min-height: calc(100vh - 100px); display: flex; flex-direction: column; background: #ffffff;">
+            <!-- Custom Header -->
+            <div class="chartly-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <!-- Home Button -->
+                    <button type="button" class="chartly-header-btn" t-on-click="onGoHome" title="Back to Chats">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </button>
+                    <!-- New Chat Button -->
+                    <button type="button" class="chartly-header-btn" t-on-click="onNewChat" title="New Chat">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                    </button>
+                    <!-- Title Input -->
+                    <input type="text" 
+                           class="chartly-title-input"
+                           t-att-value="state.chatTitle"
+                           t-on-input="onTitleInput"
+                           t-on-blur="onTitleBlur"
+                           t-on-keypress="onTitleKeyPress"
+                           placeholder="Enter chat title..."/>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div class="chartly-header-info">
+                        <span class="chartly-cost-badge">$<span class="chartly-cost-value"><t t-esc="formattedTotalCost"/></span></span>
+                        <span t-esc="state.createdAt"/>
+                    </div>
+                    <!-- Settings Dropdown -->
+                    <div class="chartly-dropdown">
+                        <button type="button" class="chartly-header-btn" t-on-click="onToggleMenu" title="Options">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                            </svg>
+                        </button>
+                        <div t-attf-class="chartly-dropdown-menu #{state.showMenu ? 'show' : ''}">
+                            <button type="button" class="chartly-dropdown-item" t-on-click="onDuplicateChat">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                                Duplicate
+                            </button>
+                            <button type="button" class="chartly-dropdown-item danger" t-on-click="onDeleteChat">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-messages chat-messages-scrollable" style="flex: 1; overflow-y: auto; padding: 24px 0; padding-bottom: 120px;">
+                <div style="max-width: 60%; margin: 0 auto;">
                     <t t-if="state.messages.length">
                         <t t-foreach="state.messages" t-as="message" t-key="message.id">
                             <div class="message-wrapper" style="margin-bottom: 18px;">
                                 <t t-if="message.sender == 'user'">
                                     <div style="display: flex; justify-content: flex-end;">
-                                        <div style="background: #e0e0e0; color: #333; padding: 12px 16px; border-radius: 18px; max-width: 83.33%; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                                        <div style="background: #f0f0f0; color: #333; padding: 12px 16px; border-radius: 18px 18px 0px 18px; max-width: 66.66%;">
                                             <div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 0.95em;" t-esc="message.content"/>
                                             <div style="font-size: 0.7em; opacity: 0.6; margin-top: 6px; text-align: right;" t-esc="message.created_at"/>
                                         </div>
@@ -18,17 +382,32 @@
                                 </t>
                                 <t t-if="message.sender == 'ai'">
                                     <div style="display: flex; justify-content: flex-start;">
-                                        <div style="color: #333; padding: 12px 0; width: 100%;">
-                                            <div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 0.95em;" t-esc="message.content"/>
-                                            <t t-if="message.image">
-                                                <img t-att-src="'data:image/png;base64,' + message.image" style="max-width: 100%; margin-top: 8px;" />
+                                        <div style="background: transparent; border: none; color: #333; padding: 12px 0; width: 100%;">
+                                            <t t-if="message.isLoading">
+                                                <div class="loading-dots">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
                                             </t>
-                                            <div style="font-size: 0.7em; opacity: 0.5; margin-top: 6px;" t-esc="message.created_at"/>
+                                            <t t-else="">
+                                                <div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 0.95em;" t-esc="message.content"/>
+                                                <t t-if="message.image">
+                                                    <img t-att-src="'data:image/png;base64,' + message.image" style="max-width: 100%; margin-top: 8px;" />
+                                                </t>
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                                                    <span style="font-size: 0.65em; color: #888; opacity: 0.7;">
+                                                        <t t-if="message.cost">$<t t-esc="message.cost.toFixed(5)"/></t>
+                                                    </span>
+                                                    <span style="font-size: 0.7em; opacity: 0.5;" t-esc="message.created_at"/>
+                                                </div>
+                                            </t>
                                         </div>
                                     </div>
                                 </t>
                             </div>
                         </t>
+                        <div class="scroll-anchor" style="height: 1px;"></div>
                     </t>
                     <t t-else="">
                         <div style="text-align: center; color: #999; padding: 60px 40px; font-size: 1.1em;">
@@ -39,21 +418,50 @@
             </div>
             
             <div class="chat-input-container" style="position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 0; background: #ffffff; border-top: 1px solid #e0e0e0; display: flex; justify-content: center; align-items: center;">
-                <div style="position: relative; width: 50%; max-width: 600px;">
+                <div style="position: relative; width: 60%;">
                     <input type="text" 
                            placeholder="Type your message here..." 
                            class="form-control chat-message-input" 
                            t-model="state.inputValue"
                            t-on-keypress="onKeyPress"
+                           t-att-disabled="state.isLoading"
                            style="width: 100%; padding: 14px 60px 14px 20px; border: 1px solid #d0d0d0; border-radius: 25px; background: #f9f9f9; color: #333; font-size: 0.95em; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);"/>
                     <button type="button" 
                             class="btn btn-primary chat-send-button"
-                            t-on-click="onSendMessage" 
-                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: #1e90ff; color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);">
-                        <span style="font-size: 18px;">→</span>
+                            t-on-click="onSendMessage"
+                            t-att-disabled="state.isLoading"
+                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: #1a1a1a; color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <t t-if="state.isLoading">
+                            <div class="send-button-square"></div>
+                        </t>
+                        <t t-else="">
+                            <span class="send-button-icon">➔</span>
+                        </t>
                     </button>
                 </div>
             </div>
+            
+            <!-- Confirmation Modal -->
+            <t t-if="state.showConfirmModal">
+                <div class="chartly-modal-overlay" t-on-click="onConfirmModalCancel">
+                    <div class="chartly-modal" t-on-click.stop="">
+                        <div class="chartly-modal-header">
+                            <h3 class="chartly-modal-title" t-esc="state.confirmModalTitle"/>
+                        </div>
+                        <div class="chartly-modal-body">
+                            <t t-esc="state.confirmModalMessage"/>
+                        </div>
+                        <div class="chartly-modal-footer">
+                            <button type="button" class="chartly-modal-btn chartly-modal-btn-cancel" t-on-click="onConfirmModalCancel">
+                                Cancel
+                            </button>
+                            <button type="button" class="chartly-modal-btn chartly-modal-btn-danger" t-on-click="onConfirmModalConfirm">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </t>
         </div>
     </t>
     

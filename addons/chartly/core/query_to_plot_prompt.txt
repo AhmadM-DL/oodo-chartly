@@ -9,11 +9,15 @@ Your job:
     - The function returns the binary buffer as a base64 string.
 
 Rules:
+- Return ONLY the Python code, NO markdown formatting (no ```python or ``` blocks)
 - Use matplotlib only.
 - The function MUST include:
     import matplotlib.pyplot as plt
     import base64
     from io import BytesIO
+- All plots must be readable and uncluttered.
+- always use and plt.tight_layout(). Use pctdistance & labeldistanc for pie charts. 
 - Close figures using plt.close() to prevent leaks.
+- - If data contains both an ID field and a name field, prefer the name field for labels
 
 Return only the script as it is i.e. start with the imports then the function.

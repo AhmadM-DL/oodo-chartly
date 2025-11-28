@@ -1,0 +1,92 @@
+/* Hide Odoo control panel for chartly chat views (both form and list) */
+
+/* Target using the form class - this selector is processed when CSS loads */
+.o_form_view:has(.chartly-chat-form) .o_control_panel,
+.o_action_manager:has(.chartly-chat-form) .o_control_panel,
+.o_view_controller:has(.chartly-chat-form) .o_control_panel {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Target by form view model attribute */
+.o_form_view[data-model="chartly.chat"] .o_control_panel {
+  display: none !important;
+}
+
+/* Target control panel when our widget container exists */
+.o_action:has(.o_chat_widget_container) .o_control_panel {
+  display: none !important;
+}
+
+.o_action:has(.chat-widget-container) .o_control_panel {
+  display: none !important;
+}
+
+/* Target when chartly header exists */
+.o_action:has(.chartly-header) .o_control_panel {
+  display: none !important;
+}
+
+/* More specific targeting */
+.o_view_controller:has(.o_chat_widget_container) .o_control_panel {
+  display: none !important;
+}
+
+.o_form_renderer:has(.o_chat_widget_container) ~ .o_control_panel {
+  display: none !important;
+}
+
+/* Add a class we can set via JS for immediate effect - form view */
+body.chartly-chat-view .o_control_panel {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Add a class we can set via JS for immediate effect - list view */
+body.chartly-list-view .o_control_panel {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hide control panel in any container with chartly-chat-form */
+.chartly-chat-form ~ .o_control_panel,
+.chartly-chat-form + .o_control_panel {
+  display: none !important;
+}
+
+/* Most aggressive: hide control panel when form has our class anywhere in hierarchy */
+.o_action:has(form.chartly-chat-form)
+  > .o_content
+  > .o_component_with_search_panel
+  > .o_view_controller
+  > .o_control_panel,
+.o_action:has(.chartly-chat-form) .o_control_panel {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hide control panel when chartly list header exists */
+.o_action:has(.chartly-list-header) .o_control_panel {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hide Odoo's RPC loading indicator in chartly chat views */
+body.chartly-chat-view .o_loading_indicator,
+body.chartly-chat-view .o_loading,
+body.chartly-list-view .o_loading_indicator,
+body.chartly-list-view .o_loading {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
