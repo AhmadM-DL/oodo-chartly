@@ -13,14 +13,20 @@
 - **Interactive Visualizations**: Create dynamic charts that help in better decision making.
 - **Chat Interface with Agentic AI**: Interact with your data through a chat interface.
 
-## 🛠️ Development
-1.  Clone this repository dev branch.
+## 🚀 Installation
+
+1.  Clone this repository main branch to your Odoo addons directory:
     ```bash
-    git clone -b dev <repository-url> oodo-chartly
+    git clone <repository-url> oodo-chartly
     ```
-2. Create a secrets folder
-3. Create openai_api_key.txt file and add your OpenAI API key.
-4. Run docker compose -f docker-compose.dev.yml up -d
+2.  Update your Odoo configuration file to include the path to this directory in `addons_path`.
+3. Download required dependencies:
+    ```bash
+    cd oodo-chartly
+    pip install -r requirements.txt
+    ```
+4.  Restart your Odoo server.
+5.  Go to **Apps**, click **Update Apps List**, search for **Chartly**, and click **Install**.
 
 ## 📦 Odoo Dependencies
 
@@ -30,11 +36,11 @@
 
 ## 📝 Contributing
 
-1.  Fork the repository.
-2.  Create a new branch for your feature or bug fix.
-3.  Make your changes and commit them.
-4.  Push your changes to your fork.
-5.  Create a pull request.
+1. Fork the repository dev branch.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push your changes to your fork.
+5. Create a pull request.
 
 ## TODO
 
