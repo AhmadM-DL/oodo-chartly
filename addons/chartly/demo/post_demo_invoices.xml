@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- 
+            Post all demo invoices and register payments on ~30% of them.
+            This MUST be loaded AFTER accounting_demo_data.xml
+        -->
+        <function model="chartly.demo.utils" name="post_demo_invoices"/>
+    </data>
+</odoo>

@@ -23,6 +23,7 @@
     },
     "demo": [
         "demo/accounting_demo_data.xml",
+        "demo/post_demo_invoices.xml",
         "demo/chat_demo_data.xml",
     ],
     "installable": True,
