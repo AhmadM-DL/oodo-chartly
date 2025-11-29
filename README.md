@@ -46,3 +46,7 @@
 ## 📝 License
 
 This project is licensed under the MIT License
+
+## 📝 Report
+
+- Project Report: [Link Here](https://drive.google.com/file/d/1gQxQjq9e4w--YE5kxeGEk286DLPaWlSn/view?usp=sharing)
